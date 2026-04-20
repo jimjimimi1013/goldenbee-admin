@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Golden Bee Admin Console</title>
+    <meta
+      name="description"
+      content="Golden Bee 관리자용 어드민 샘플 페이지"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=SUIT:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">GB</div>
+          <div>
+            <p class="brand-title">Golden Bee Admin</p>
+            <p class="brand-sub">주문 자동화 운영 콘솔 샘플</p>
+          </div>
+        </div>
+
+        <nav class="menu" id="menu"></nav>
+
+        <section class="sidebar-card">
+          <p class="eyebrow">운영 메모</p>
+          <p>
+            고객 미리보기와 실제 PDF 결과가 최대한 같게 보이도록 옵션, 문구,
+            폰트 기준을 한 화면에서 관리하는 구조입니다.
+          </p>
+        </section>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Admin Mockup</p>
+            <h1>관리자용 어드민 샘플 페이지</h1>
+            <p class="topbar-copy">
+              상품 템플릿, 옵션 색상, 문구 좌표, PDF 생성 흐름을 한 번에 보여주는
+              데모 화면입니다.
+            </p>
+          </div>
+          <div class="topbar-actions">
+            <button class="button button-secondary">템플릿 업로드</button>
+            <button class="button button-primary">신규 상품 생성</button>
+          </div>
+        </header>
+
+        <section class="stats" id="stats"></section>
+
+        <section class="panel-grid">
+          <article class="panel panel-wide">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Overview</p>
+                <h2>운영 핵심 체크리스트</h2>
+              </div>
+            </div>
+            <div class="checklist" id="checklist"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Risk</p>
+                <h2>현재 운영 리스크</h2>
+              </div>
+            </div>
+            <div class="risk-list" id="risks"></div>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Template</p>
+                <h2>상품 / 템플릿 매핑</h2>
+              </div>
+            </div>
+            <div class="product-list" id="products"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Preview</p>
+                <h2>실시간 옵션 미리보기</h2>
+              </div>
+            </div>
+
+            <div class="controls">
+              <label>
+                <span>형태</span>
+                <select id="shapeSelect"></select>
+              </label>
+              <label>
+                <span>프레임 색상</span>
+                <select id="frameSelect"></select>
+              </label>
+              <label>
+                <span>배경 색상</span>
+                <select id="backgroundSelect"></select>
+              </label>
+              <label>
+                <span>캘리 색상</span>
+                <select id="calligraphySelect"></select>
+              </label>
+              <label class="label-full">
+                <span>문구</span>
+                <input
+                  id="messageInput"
+                  type="text"
+                  maxlength="24"
+                  value="반짝이는 감사의 마음을 담았습니다"
+                />
+              </label>
+            </div>
+
+            <div class="progress-row">
+              <span>출력 준비도</span>
+              <strong id="progressValue">0%</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="preview-stage">
+              <div class="preview-card" id="previewCard">
+                <div class="preview-label">고객 미리보기 샘플</div>
+                <div class="preview-message" id="previewMessage"></div>
+                <div class="preview-chip">순금 0.1g</div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel-grid">
+          <article class="panel panel-wide">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Orders</p>
+                <h2>주문 / PDF 파일 관리</h2>
+              </div>
+            </div>
+            <div class="orders" id="orders"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Logs</p>
+                <h2>자동 로그</h2>
+              </div>
+            </div>
+            <div class="log-list" id="logs"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
