@@ -236,7 +236,8 @@ function bindControls() {
   const shapeSelect = document.querySelector("#shapeSelect");
   shapeSelect.innerHTML = ["정사각형", "직사각형"]
     .map(
-      (value) => `<option value="${value}" ${value === formState.shape ? "selected" : ""}>${value}</option>`,
+      (value) =>
+        `<option value="${value}" ${value === formState.shape ? "selected" : ""}>${value}</option>`,
     )
     .join("");
 
