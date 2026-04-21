@@ -3,10 +3,10 @@ const icons = {
   templates: "◫",
   options: "◉",
   typography: "T",
-  pdf: "⇩",
+  file: "⇩",
   logs: "⚠",
   settings: "⚙",
-  pdfFile: "⎘",
+  fileFile: "⎘",
   shield: "⛨",
   clock: "◷",
 };
@@ -14,10 +14,11 @@ const icons = {
 const navItems = [
   { id: "dashboard", label: "대시보드", icon: icons.dashboard },
   { id: "templates", label: "템플릿 관리", icon: icons.templates },
-  { id: "mappings", label: "상품 연결 관리", icon: icons.options },
-  { id: "pdf", label: "PDF 파일 / 검수", icon: icons.pdf },
+  { id: "mappings", label: "상품 연결", icon: icons.options },
+  { id: "file", label: "파일 다운로드", icon: icons.file },
+  { id: "settings", label: "운영자 관리", icon: icons.settings },
+  { id: "mall", label: "몰 정보 / 상담", icon: icons.dashboard },
   { id: "logs", label: "오류 로그", icon: icons.logs },
-  { id: "settings", label: "환경설정 / 권한", icon: icons.settings },
 ];
 
 const state = {
@@ -25,7 +26,7 @@ const state = {
   templateTab: "create",
   search: "",
   mappingSearch: "",
-  pdfSearch: "",
+  fileSearch: "",
   templateProductSearch: "",
   products: [
     { id: "P-101", name: "감사패 정사각형 A", cafe24: "product_no_101", template: "TPL-SQ-01", shape: "정사각형", font: "나눔명조 Bold", optionSetIds: ["OPT-FRAME-01", "OPT-BG-01", "OPT-CALLI-01"], copyX: 50, copyY: 47, maxChars: 25, maxLines: 3, status: "운영중", updatedAt: "2026-04-20 09:10" },
@@ -40,14 +41,14 @@ const state = {
     { id: "OPT-TITLE-COLOR-01", title: "메인타이틀 캘리컬러", values: [{ name: "골드", code: "#C8A44D" }, { name: "실버", code: "#BFC4CC" }, { name: "블랙", code: "#111111" }], defaultValue: "골드", active: true },
     { id: "OPT-SUBTITLE-COLOR-01", title: "문구컬러", values: [{ name: "블랙", code: "#111111" }, { name: "그레이", code: "#767676" }, { name: "브라운", code: "#6B4C35" }], defaultValue: "블랙", active: true },
   ],
-  pdfJobs: [
+  fileJobs: [
     { id: "JOB-240420-001", orderRef: "CAFE24-54821", customerName: "김민준", customerPhone: "010-2451-8821", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 골드 / 0.1g", template: "TPL-SQ-01", status: "성공", downloadStatus: "다운로드대기", createdAt: "2026-04-20 08:52", issue: "-" },
     { id: "JOB-240420-002", orderRef: "CAFE24-54822", customerName: "이서연", customerPhone: "010-3312-7744", orderedProduct: "감사패 직사각형 B", orderedOptions: "프레임 블랙 / 배경 웜그레이 / 캘리 실버 / 0.2g", template: "TPL-RE-01", status: "실패", downloadStatus: "다운로드대기", createdAt: "2026-04-20 08:58", issue: "문구 길이 초과로 텍스트 아웃라인 변환이 중단되었습니다." },
-    { id: "JOB-240420-003", orderRef: "CAFE24-54823", customerName: "박지후", customerPhone: "010-8842-1182", orderedProduct: "부모님 트로피 정사각형 C", orderedOptions: "프레임 실버 / 배경 차콜 / 캘리 골드 / 0.1g", template: "TPL-SQ-01", status: "대기", downloadStatus: "다운로드대기", createdAt: "2026-04-20 09:05", issue: "PDF 생성 큐 대기중" },
+    { id: "JOB-240420-003", orderRef: "CAFE24-54823", customerName: "박지후", customerPhone: "010-8842-1182", orderedProduct: "부모님 트로피 정사각형 C", orderedOptions: "프레임 실버 / 배경 차콜 / 캘리 골드 / 0.1g", template: "TPL-SQ-01", status: "대기", downloadStatus: "다운로드대기", createdAt: "2026-04-20 09:05", issue: "EPS 생성 큐 대기중" },
     { id: "JOB-240420-004", orderRef: "CAFE24-54824", customerName: "최윤아", customerPhone: "010-5531-0291", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 실버 / 0.3g", template: "TPL-SQ-01", status: "성공", downloadStatus: "다운로드완료", createdAt: "2026-04-20 09:07", issue: "-" },
   ],
   logs: [
-    { id: "LOG-001", level: "error", title: "PDF 생성 실패", detail: "문구 최대 길이를 초과하여 텍스트 아웃라인 변환이 중단되었습니다.", time: "2026-04-20 08:58" },
+    { id: "LOG-001", level: "error", title: "EPS 생성 실패", detail: "문구 최대 길이를 초과하여 텍스트 아웃라인 변환이 중단되었습니다.", time: "2026-04-20 08:58" },
     { id: "LOG-002", level: "warning", title: "템플릿 변경 미반영 상태", detail: "TPL-RE-01 템플릿이 수정되었지만 운영 반영은 아직 이루어지지 않았습니다.", time: "2026-04-20 08:30" },
     { id: "LOG-003", level: "success", title: "옵션셋 저장 완료", detail: "OPT-CALLI-01 기본값이 골드로 저장되었습니다.", time: "2026-04-19 17:11" },
   ],
@@ -66,7 +67,8 @@ const state = {
   copyY: 47,
   fontScale: 28,
   safeMode: true,
-  pdfFilter: "전체",
+  fileFilter: "전체",
+  previewFileJobId: null,
   autoOutline: true,
   templateVersion: "v1.8",
   checklistOpen: false,
@@ -77,6 +79,7 @@ const state = {
   optionSetCreateOpen: false,
   optionSetPickerOpen: false,
   mappingTemplateId: "TPL-SQ-01",
+  mappingHistoryOpen: false,
   templateDraft: {
     templateId: "",
     name: "",
@@ -101,6 +104,31 @@ const state = {
     items: [{ name: "골드", code: "#C8A44D" }],
     defaultIndex: 0,
   },
+  editingOptionSetId: null,
+  sourceRules: [
+    { id: "SRC-SQ-200", shape: "정사각형", widthMm: 180, heightMm: 180, copyX: 50, copyY: 47, maxChars: 25, maxLines: 3, safeLine: true, safeValue: 12, updatedAt: "2026-04-21 10:20" },
+    { id: "SRC-RE-240", shape: "직사각형", widthMm: 240, heightMm: 180, copyX: 48, copyY: 45, maxChars: 28, maxLines: 3, safeLine: true, safeValue: 10, updatedAt: "2026-04-21 10:25" },
+  ],
+  sourceDraft: {
+    shape: "정사각형",
+    widthMm: "180",
+    heightMm: "180",
+    copyX: "50",
+    copyY: "47",
+    maxChars: "25",
+    maxLines: "3",
+    safeLine: true,
+    safeValue: "12",
+  },
+  editingSourceId: null,
+  sourceSearch: "",
+  operators: [
+    { id: "OP-001", name: "관리자", loginId: "admin", phone: "010-1000-2000", role: "관리자", memo: "전체 관리 가능" },
+    { id: "OP-002", name: "검수 담당", loginId: "checker", phone: "010-3000-4000", role: "검수 담당", memo: "EPS 미리보기와 재생성 가능" },
+    { id: "OP-003", name: "일반 운영자", loginId: "operator", phone: "010-5000-6000", role: "일반 운영자", memo: "상품 연결과 파일 다운로드 가능" },
+  ],
+  operatorDraft: { name: "", loginId: "", phone: "", role: "일반 운영자" },
+  editingOperatorId: null,
 };
 
 
@@ -118,6 +146,17 @@ const OPTION_SET_TYPES = [
 
 function getShapePreset(shape) {
   const fallback = SHAPE_PRESETS[shape] || SHAPE_PRESETS["정사각형"];
+  const sourceRule = state.sourceRules?.find((rule) => rule.shape === shape);
+  if (sourceRule) {
+    return {
+      widthMm: String(sourceRule.widthMm),
+      heightMm: String(sourceRule.heightMm),
+      copyX: String(sourceRule.copyX),
+      copyY: String(sourceRule.copyY),
+      maxChars: String(sourceRule.maxChars),
+      maxLines: String(sourceRule.maxLines),
+    };
+  }
   const matched = state.products.find((product) => product.shape === shape);
   if (!matched) return fallback;
   return {
@@ -219,6 +258,49 @@ function resetOptionSetDraft() {
     defaultIndex: 0,
   };
   refreshOptionSetDraftId();
+  state.editingOptionSetId = null;
+}
+
+function resetSourceDraft(shape = "정사각형") {
+  const preset = state.sourceRules.find((rule) => rule.shape === shape) || state.sourceRules[0];
+  state.sourceDraft = {
+    shape: preset.shape,
+    widthMm: String(preset.widthMm),
+    heightMm: String(preset.heightMm),
+    copyX: String(preset.copyX),
+    copyY: String(preset.copyY),
+    maxChars: String(preset.maxChars),
+    maxLines: String(preset.maxLines),
+    safeLine: preset.safeLine,
+    safeValue: String(preset.safeValue),
+  };
+  state.editingSourceId = null;
+}
+
+function resetOperatorDraft() {
+  state.operatorDraft = { name: "", loginId: "", phone: "", role: "일반 운영자" };
+  state.editingOperatorId = null;
+}
+
+function nextSourceId(shape) {
+  const prefix = shape === "직사각형" ? "SRC-RE" : "SRC-SQ";
+  const next = nextSequenceFromIds(state.sourceRules.map((rule) => rule.id), prefix);
+  return `${prefix}-${String(next).padStart(3, "0")}`;
+}
+
+function nextOperatorId() {
+  const next = nextSequenceFromIds(state.operators.map((operator) => operator.id), "OP");
+  return `OP-${String(next).padStart(3, "0")}`;
+}
+
+function filteredSourceRules() {
+  const keyword = state.sourceSearch.trim().toLowerCase();
+  if (!keyword) return state.sourceRules;
+  return state.sourceRules.filter((rule) =>
+    [rule.id, rule.shape, `${rule.widthMm}x${rule.heightMm}`].some((value) =>
+      String(value).toLowerCase().includes(keyword),
+    ),
+  );
 }
 function getSelectedProduct() {
   return state.products.find((product) => product.id === state.selectedProductId) || state.products[0];
@@ -268,15 +350,15 @@ function templateCatalog() {
     }));
 }
 
-function filteredPdfJobs() {
-  const searchedJobs = state.pdfJobs.filter((job) => {
-    const keyword = state.pdfSearch.trim().toLowerCase();
+function filteredFileJobs() {
+  const searchedJobs = state.fileJobs.filter((job) => {
+    const keyword = state.fileSearch.trim().toLowerCase();
     if (!keyword) return true;
     return [job.customerName, job.customerPhone, job.orderRef, job.orderedProduct, job.orderedOptions]
       .some((value) => value.toLowerCase().includes(keyword));
   });
-  if (state.pdfFilter === "전체") return searchedJobs;
-  return searchedJobs.filter((job) => job.status === state.pdfFilter);
+  if (state.fileFilter === "전체") return searchedJobs;
+  return searchedJobs.filter((job) => job.status === state.fileFilter);
 }
 
 function filteredCafe24Products() {
@@ -334,8 +416,8 @@ function recentTemplates() {
 }
 
 function successRate() {
-  const ok = state.pdfJobs.filter((job) => job.status === "성공").length;
-  return Math.round((ok / state.pdfJobs.length) * 100);
+  const ok = state.fileJobs.filter((job) => job.status === "성공").length;
+  return Math.round((ok / state.fileJobs.length) * 100);
 }
 
 function badgeClass(status) {
@@ -403,14 +485,14 @@ function dashboardSection() {
     <div class="grid-4">
       <div class="card"><div class="card-body"><div class="eyebrow">운영 상품 수</div><div class="stat-value">${state.products.length}</div><div class="small muted">카페24 주문 관리와 분리된 운영 콘솔</div></div></div>
       <div class="card"><div class="card-body"><div class="eyebrow">템플릿 버전</div><div class="stat-value">${escapeHtml(state.templateVersion)}</div><div class="small muted">운영 배포 기준 버전</div></div></div>
-      <div class="card"><div class="card-body"><div class="eyebrow">PDF 성공률</div><div class="stat-value">${successRate()}%</div><div class="small muted">실패 건은 재생성 가능</div></div></div>
+      <div class="card"><div class="card-body"><div class="eyebrow">EPS 성공률</div><div class="stat-value">${successRate()}%</div><div class="small muted">실패 건은 재생성 가능</div></div></div>
       <div class="card"><div class="card-body"><div class="eyebrow">오류 로그</div><div class="stat-value">${state.logs.length}</div><div class="small muted">비개발자 확인 가능한 상태</div></div></div>
     </div>
     <div class="grid-split">
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">운영 핵심 흐름</h2>
-          <div class="card-description">주문 관리는 카페24에서 진행하고, 이 콘솔은 템플릿 테스트와 PDF 결과만 통제합니다.</div>
+          <div class="card-description">주문 관리는 카페24에서 진행하고, 이 콘솔은 템플릿 테스트와 EPS 결과만 통제합니다.</div>
         </div>
         <div class="card-body">
           <div class="flow-grid">
@@ -418,7 +500,7 @@ function dashboardSection() {
               ["템플릿 매핑", "상품별 템플릿 ID 연결"],
               ["옵션값 관리", "프레임 / 배경 / 캘리 공통 관리"],
               ["폰트 / 좌표", "문구 위치와 출력 규칙 설정"],
-              ["PDF 검수", "생성 파일 다운로드 / 재생성"],
+              ["EPS 검수", "생성 파일 다운로드 / 재생성"],
             ].map(([title, desc]) => `<div class="soft-box"><div style="font-weight:700;">${title}</div><div class="small muted" style="margin-top:8px;">${desc}</div></div>`).join("")}
           </div>
         </div>
@@ -431,7 +513,7 @@ function dashboardSection() {
         <div class="card-body">
           <div class="toggle-box">
             <div class="toggle-row">
-              <div><div>운영 반영 준비율</div><div class="tiny muted" style="margin-top:4px;">템플릿 / 옵션 / PDF 규칙 점검 기준</div></div>
+              <div><div>운영 반영 준비율</div><div class="tiny muted" style="margin-top:4px;">템플릿 / 옵션 / EPS 규칙 점검 기준</div></div>
               <div style="width:160px;"><div class="progress-rail"><div class="progress-fill" style="width:82%;"></div></div></div>
             </div>
           </div>
@@ -489,13 +571,13 @@ function templatesSection() {
           <div class="summary-box">
             <div style="font-weight:700;">기본 출력 규칙</div>
             <div class="key-value" style="margin-top:16px;">
-              <div class="key-value-row"><span>문구 X 좌표</span><strong><input id="draftCopyX" class="text-input" value="${escapeHtml(state.templateDraft.copyX)}" style="width:88px;padding:8px 10px;" /></strong></div>
-              <div class="key-value-row"><span>문구 Y 좌표</span><strong><input id="draftCopyY" class="text-input" value="${escapeHtml(state.templateDraft.copyY)}" style="width:88px;padding:8px 10px;" /></strong></div>
-              <div class="key-value-row"><span>최대 줄수</span><strong><input id="draftMaxLines" class="text-input" value="${escapeHtml(state.templateDraft.maxLines)}" style="width:88px;padding:8px 10px;" /></strong></div>
-              <div class="key-value-row"><span>글자수 제한</span><strong><input id="draftMaxChars" class="text-input" value="${escapeHtml(state.templateDraft.maxChars)}" style="width:88px;padding:8px 10px;" /></strong></div>
+              <div class="key-value-row"><span>문구 X 좌표</span><strong>${escapeHtml(state.templateDraft.copyX)}</strong></div>
+              <div class="key-value-row"><span>문구 Y 좌표</span><strong>${escapeHtml(state.templateDraft.copyY)}</strong></div>
+              <div class="key-value-row"><span>최대 줄수</span><strong>${escapeHtml(state.templateDraft.maxLines)}줄</strong></div>
+              <div class="key-value-row"><span>글자수 제한</span><strong>${escapeHtml(state.templateDraft.maxChars)}자</strong></div>
               <div class="key-value-row"><span>자동 아웃라인</span><strong>사용</strong></div>
             </div>
-            <div class="tiny muted" style="margin-top:12px;">액자 형태를 바꾸면 문구 좌표와 최대 글자수 규칙이 자동으로 채워집니다.</div>
+            <div class="tiny muted" style="margin-top:12px;">좌표값은 직접 입력하지 않고 소스 위치 설정 탭의 기준값을 자동 참조합니다.</div>
           </div>
           <div class="summary-box">
             <div style="font-weight:700;">생성 후 상태</div>
@@ -582,6 +664,10 @@ function templatesSection() {
             <div class="key-value-row"><span>문구 좌표</span><strong>X ${escapeHtml(selected.copyX)} / Y ${escapeHtml(selected.copyY)}</strong></div>
             <div class="key-value-row"><span>최대 글자수 / 줄 수</span><strong>${escapeHtml(selected.maxChars)}자 / ${escapeHtml(selected.maxLines)}줄</strong></div>
           </div>
+          <div class="button-row" style="margin-top:14px;">
+            <button class="button secondary" data-action="edit-template-product" data-id="${selected.id}">수정</button>
+            <button class="button secondary" data-action="disable-template-product" data-id="${selected.id}">삭제</button>
+          </div>
           <div style="margin-top:18px;">${previewCard()}</div>
         </div>
       </div>
@@ -614,7 +700,8 @@ function templatesSection() {
             </div>
           </div>
           <div class="button-row" style="margin-top:18px;">
-            <button class="button primary" data-action="confirm-option-set-create">옵션/색상셋 생성</button>
+            <button class="button secondary" data-action="reset-option-set-draft">초기화</button>
+            <button class="button primary" data-action="confirm-option-set-create">${state.editingOptionSetId ? "옵션/색상셋 수정" : "옵션/색상셋 생성"}</button>
           </div>
         </div>
       </div>
@@ -649,10 +736,11 @@ function templatesSection() {
       <div class="tab-row">
         <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. 템플릿 생성</button>
         <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. 템플릿 리스트</button>
-        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. 옵션 / 색상셋</button>
-        <button class="tab-button ${state.templateTab === "typography" ? "active" : ""}" data-action="template-tab" data-value="typography">4. 문구 / 폰트 / 좌표</button>
+        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. 옵션셋 생성</button>
+        <button class="tab-button ${state.templateTab === "optionList" ? "active" : ""}" data-action="template-tab" data-value="optionList">4. 옵션셋 리스트</button>
+        <button class="tab-button ${state.templateTab === "typography" ? "active" : ""}" data-action="template-tab" data-value="typography">5. 소스 위치 설정</button>
       </div>
-      ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : state.templateTab === "options" ? optionTab : typographySection()}
+      ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : state.templateTab === "options" ? optionTab : state.templateTab === "optionList" ? optionListSection() : typographySection()}
     </div>
   `;
 }
@@ -687,7 +775,7 @@ function optionsSection() {
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">옵션 미리보기</h2>
-          <div class="card-description">실시간 미리보기와 PDF 생성이 같은 설정값을 공유하도록 구성했습니다.</div>
+          <div class="card-description">실시간 미리보기와 EPS 생성이 같은 설정값을 공유하도록 구성했습니다.</div>
         </div>
         <div class="card-body">
           <div class="grid-preview">
@@ -704,56 +792,121 @@ function optionsSection() {
   `;
 }
 
-function typographySection() {
+function optionListSection() {
   return `
-    <div class="grid-preview">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">문구 / 폰트 / 좌표 설정</h2>
-          <div class="card-description">자유 편집이 아니라 고정 템플릿 기준 좌표와 출력 규칙만 조정합니다.</div>
-        </div>
-        <div class="card-body">
-          <div class="control-stack">
-            <div>
-              <div style="font-weight:700;">상품 선택</div>
-              <select class="select" id="productSelect" style="margin-top:10px;">
-                ${state.products.map((product) => `<option value="${product.id}" ${product.id === state.selectedProductId ? "selected" : ""}>${escapeHtml(product.name)}</option>`).join("")}
-              </select>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">옵션셋 리스트</h2>
+        <div class="card-description">생성된 옵션셋을 조회, 수정, 삭제합니다. 사용중인 옵션셋은 삭제 대신 비활성 처리합니다.</div>
+      </div>
+      <div class="card-body">
+        <div class="option-stack">
+          ${state.optionSets.map((set) => `
+            <div class="soft-box">
+              <div class="option-card-top">
+                <div>
+                  <div style="font-weight:700;">${escapeHtml(set.title)}</div>
+                  <div class="small muted" style="margin-top:6px;">${escapeHtml(set.id)} · ${set.values.length}개 옵션 · 기본값 ${escapeHtml(set.defaultValue)}</div>
+                </div>
+                <span class="${set.active ? "badge success" : "badge error"}">${set.active ? "사용중" : "비활성"}</span>
+              </div>
+              <div class="chip-group" style="margin-top:12px;">${set.values.map((value) => `<span class="badge neutral">${escapeHtml(getOptionValueName(value))}${getOptionValueCode(value) ? ` (${escapeHtml(getOptionValueCode(value))})` : ""}</span>`).join("")}</div>
+              <div class="button-row" style="margin-top:12px;">
+                <button class="button secondary" data-action="edit-option-set" data-id="${set.id}">수정</button>
+                <button class="button secondary" data-action="delete-option-set" data-id="${set.id}">삭제</button>
+              </div>
             </div>
-            <div class="slider-wrap"><div class="toggle-row"><span style="font-weight:700;">X 좌표</span><strong>${state.copyX}%</strong></div><input type="range" min="20" max="80" step="1" value="${state.copyX}" data-range="copy-x" /></div>
-            <div class="slider-wrap"><div class="toggle-row"><span style="font-weight:700;">Y 좌표</span><strong>${state.copyY}%</strong></div><input type="range" min="25" max="70" step="1" value="${state.copyY}" data-range="copy-y" /></div>
-            <div class="slider-wrap"><div class="toggle-row"><span style="font-weight:700;">폰트 크기</span><strong>${state.fontScale}px</strong></div><input type="range" min="18" max="40" step="1" value="${state.fontScale}" data-range="font-scale" /></div>
-            <div class="grid-2">
-              <div class="soft-box"><div class="tiny muted">최대 줄수</div><div style="margin-top:6px;font-size:1.3rem;font-weight:800;">3줄</div></div>
-              <div class="soft-box"><div class="tiny muted">글자수 제한</div><div style="margin-top:6px;font-size:1.3rem;font-weight:800;">25자</div></div>
-            </div>
-            <div class="guide-box small muted">현재 설계 기준은 상패 모양별 문구 위치는 동일하고, 상품별 폰트만 달라질 수 있는 구조를 반영합니다.</div>
-          </div>
+          `).join("")}
         </div>
       </div>
-      <div>${previewCard()}</div>
     </div>
   `;
 }
 
-function pdfSection() {
+function typographySection() {
+  return `
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">소스 위치 설정</h2>
+          <div class="card-description">좌표 관련 값은 여기에서만 관리하고, 템플릿 생성 화면은 이 기준값을 자동 참조합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <label class="form-field">
+              <span class="field-label">액자 형태</span>
+              <select id="sourceShape" class="select">
+                <option value="정사각형" ${state.sourceDraft.shape === "정사각형" ? "selected" : ""}>정사각형</option>
+                <option value="직사각형" ${state.sourceDraft.shape === "직사각형" ? "selected" : ""}>직사각형</option>
+              </select>
+            </label>
+            <label class="form-field"><span class="field-label">가로(mm)</span><input class="text-input" data-source-field="widthMm" value="${escapeHtml(state.sourceDraft.widthMm)}" /></label>
+            <label class="form-field"><span class="field-label">세로(mm)</span><input class="text-input" data-source-field="heightMm" value="${escapeHtml(state.sourceDraft.heightMm)}" /></label>
+            <label class="form-field"><span class="field-label">문구 X 좌표(%)</span><input class="text-input" data-source-field="copyX" value="${escapeHtml(state.sourceDraft.copyX)}" /></label>
+            <label class="form-field"><span class="field-label">문구 Y 좌표(%)</span><input class="text-input" data-source-field="copyY" value="${escapeHtml(state.sourceDraft.copyY)}" /></label>
+            <label class="form-field"><span class="field-label">최대 글자수</span><input class="text-input" data-source-field="maxChars" value="${escapeHtml(state.sourceDraft.maxChars)}" /></label>
+            <label class="form-field"><span class="field-label">최대 줄 수</span><input class="text-input" data-source-field="maxLines" value="${escapeHtml(state.sourceDraft.maxLines)}" /></label>
+            <label class="form-field"><span class="field-label">안전선 여백(mm)</span><input class="text-input" data-source-field="safeValue" value="${escapeHtml(state.sourceDraft.safeValue)}" /></label>
+            <div class="form-field">
+              <span class="field-label">안전선 사용</span>
+              <button class="${chooseButton(state.sourceDraft.safeLine)}" data-action="toggle-source-safe">${state.sourceDraft.safeLine ? "사용" : "미사용"}</button>
+            </div>
+          </div>
+          <div class="button-row" style="margin-top:18px;">
+            <button class="button secondary" data-action="reset-source-draft">초기화</button>
+            <button class="button primary" data-action="save-source-rule">${state.editingSourceId ? "소스 위치 수정" : "소스 위치 저장"}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">소스 위치 리스트</h2>
+          <div class="card-description">액자 형태별 기준값을 검색하고 수정/삭제합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="product-search"><input id="sourceSearchInput" class="text-input" value="${escapeHtml(state.sourceSearch)}" placeholder="소스 ID, 액자 형태, 사이즈 검색" /></div>
+          <div class="list-stack" style="margin-top:14px;">
+            ${filteredSourceRules().map((rule) => `
+              <div class="soft-box">
+                <div class="job-top">
+                  <div>
+                    <div style="font-weight:700;">${escapeHtml(rule.id)} · ${escapeHtml(rule.shape)}</div>
+                    <div class="small muted" style="margin-top:6px;">${escapeHtml(rule.widthMm)}×${escapeHtml(rule.heightMm)}mm · X ${escapeHtml(rule.copyX)} / Y ${escapeHtml(rule.copyY)} · ${escapeHtml(rule.maxChars)}자 / ${escapeHtml(rule.maxLines)}줄</div>
+                    <div class="tiny muted" style="margin-top:6px;">안전선 ${rule.safeLine ? "사용" : "미사용"} · 여백 ${escapeHtml(rule.safeValue)}mm · ${escapeHtml(rule.updatedAt)}</div>
+                  </div>
+                  <div class="button-row">
+                    <button class="button secondary" data-action="edit-source-rule" data-id="${rule.id}">수정</button>
+                    <button class="button secondary" data-action="delete-source-rule" data-id="${rule.id}">삭제</button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function fileSection() {
   return `
     <div class="card">
       <div class="card-header">
         <div class="job-top">
           <div>
-            <h2 class="card-title">PDF 파일 / 검수</h2>
-            <div class="card-description">고객이 생성한 인쇄용 파일 확인, 다운로드, 재생성만 담당합니다.</div>
+            <h2 class="card-title">파일 다운로드</h2>
+            <div class="card-description">주문에 연결된 제작 파일(EPS)을 검색, 미리보기, 다운로드합니다.</div>
           </div>
-          <div class="chip-group">${["전체", "성공", "실패", "대기"].map((value) => `<button class="${chooseButton(state.pdfFilter === value)}" data-action="pdf-filter" data-value="${value}">${value}</button>`).join("")}</div>
+          <div class="chip-group">${["전체", "성공", "실패", "대기"].map((value) => `<button class="${chooseButton(state.fileFilter === value)}" data-action="file-filter" data-value="${value}">${value}</button>`).join("")}</div>
         </div>
       </div>
       <div class="card-body">
         <div class="product-search" style="margin-bottom:16px;">
-          <input id="pdfSearchInput" class="text-input" value="${escapeHtml(state.pdfSearch)}" placeholder="주문자명, 카페24 주문번호, 주문상품명으로 검색" />
+          <input id="fileSearchInput" class="text-input" value="${escapeHtml(state.fileSearch)}" placeholder="주문자명, 주문상품, 연락처, 카페24 주문번호로 검색" />
         </div>
         <div class="jobs-stack">
-          ${filteredPdfJobs().map((job) => `
+          ${filteredFileJobs().map((job) => `
             <div class="job-box">
               <div class="job-top">
                 <div>
@@ -770,11 +923,18 @@ function pdfSection() {
                   <div class="tiny muted" style="margin-top:8px;">작업번호: ${escapeHtml(job.id)} · 템플릿: ${escapeHtml(job.template)}</div>
                 </div>
                 <div class="button-row">
-                  <button class="button secondary">이미지 미리보기</button>
-                  <button class="button secondary" data-action="download-pdf" data-id="${job.id}">EPS 다운로드</button>
-                  ${job.status !== "성공" ? `<button class="button primary" data-action="retry-pdf" data-id="${job.id}">재생성</button>` : ""}
+                  <button class="button secondary" data-action="preview-file" data-id="${job.id}">이미지 미리보기</button>
+                  <button class="button secondary" data-action="download-file" data-id="${job.id}">EPS 다운로드</button>
+                  ${job.status !== "성공" ? `<button class="button primary" data-action="retry-file" data-id="${job.id}">재생성</button>` : ""}
                 </div>
               </div>
+              ${state.previewFileJobId === job.id ? `
+                <div class="summary-box" style="margin-top:14px;">
+                  <div style="font-weight:700;">EPS 미리보기</div>
+                  <div class="small muted" style="margin-top:8px;">${escapeHtml(job.orderedProduct)} / ${escapeHtml(job.orderedOptions)}</div>
+                  <div style="margin-top:12px;">${previewCard(job.template.includes("RE") ? "직사각형" : "정사각형")}</div>
+                </div>
+              ` : ""}
             </div>
           `).join("")}
         </div>
@@ -791,7 +951,7 @@ function mappingsSection() {
     <div class="grid-main">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">카페24 상품 연결 관리</h2>
+          <h2 class="card-title">상품 연결</h2>
           <div class="card-description">생성된 템플릿을 카페24 상품과 연결하는 별도 관리 화면</div>
         </div>
         <div class="card-body">
@@ -861,9 +1021,16 @@ function mappingsSection() {
           </div>
 
           <div class="button-row" style="margin-top:18px;">
-            <button class="button secondary">이전 연결 보기</button>
+            <button class="button secondary" data-action="toggle-mapping-history">이전 연결 보기</button>
             <button class="button primary" data-action="save-mapping">연결 저장</button>
           </div>
+          ${state.mappingHistoryOpen ? `
+            <div class="summary-box" style="margin-top:14px;">
+              <div style="font-weight:700;">최근 연결 이력</div>
+              <div class="small muted" style="margin-top:8px;">2026-04-20 09:10 · ${escapeHtml(selected.template)} 연결</div>
+              <div class="small muted" style="margin-top:6px;">2026-04-18 17:30 · 옵션셋 ${escapeHtml(optionSetSummary(selected.optionSetIds))} 적용</div>
+            </div>
+          ` : ""}
         </div>
       </div>
     </div>
@@ -893,7 +1060,7 @@ function logsSection() {
               ["문구 길이 초과", "글자수 제한과 최대 줄 수부터 먼저 확인합니다."],
               ["폰트 아웃라인 실패", "폰트 파일 등록 상태와 자동 아웃라인 설정을 점검합니다."],
               ["배포 후 설정 미적용", "운영 반영 버튼이 눌렸는지와 버전 증가 여부를 확인합니다."],
-              ["PDF 생성 지연", "대기 상태인지 실제 실패 상태인지 먼저 구분합니다."],
+              ["EPS 생성 지연", "대기 상태인지 실제 실패 상태인지 먼저 구분합니다."],
             ].map(([title, desc]) => `<div class="guide-box"><strong>${title}</strong><div class="small muted" style="margin-top:8px;">${desc}</div></div>`).join("")}
           </div>
         </div>
@@ -907,31 +1074,64 @@ function settingsSection() {
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">권한 설정</h2>
-          <div class="card-description">운영자가 만질 수 있는 영역과 개발 영역을 분리합니다.</div>
+          <h2 class="card-title">운영자 리스트</h2>
+          <div class="card-description">운영자 계정을 조회하고 수정/삭제합니다.</div>
         </div>
         <div class="card-body">
           <div class="list-stack">
-            ${[
-              ["운영 매니저", "템플릿 매핑, 옵션값, PDF 다운로드 가능"],
-              ["검수 담당", "PDF 미리보기와 실패 건 재생성 가능"],
-              ["개발자", "렌더링 원본 템플릿과 서버 설정 수정 가능"],
-            ].map(([role, desc]) => `<div class="row-box"><div class="toggle-row"><div><strong>${role}</strong><div class="small muted" style="margin-top:6px;">${desc}</div></div><span>${icons.shield}</span></div></div>`).join("")}
+            ${state.operators.map((operator) => `<div class="row-box"><div class="toggle-row"><div><strong>${escapeHtml(operator.name)}</strong><div class="small muted" style="margin-top:6px;">${escapeHtml(operator.loginId)} · ${escapeHtml(operator.phone)} · ${escapeHtml(operator.role)} · ${escapeHtml(operator.memo)}</div></div><div class="button-row"><button class="button secondary" data-action="edit-operator" data-id="${operator.id}">수정</button><button class="button secondary" data-action="delete-operator" data-id="${operator.id}">삭제</button></div></div></div>`).join("")}
           </div>
         </div>
       </div>
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">환경 설정</h2>
-          <div class="card-description">PDF 생성 기준과 운영 보조 기능만 단순하게 제공합니다.</div>
+          <h2 class="card-title">운영자 생성</h2>
+          <div class="card-description">mock data 기준으로 생성 동작을 시뮬레이션합니다.</div>
         </div>
         <div class="card-body">
           <div class="list-stack">
-            <div class="toggle-box"><div class="toggle-row"><div><strong>자동 아웃라인 처리</strong><div class="small muted" style="margin-top:6px;">수신 환경과 무관하게 동일 출력</div></div><button class="switch ${state.autoOutline ? "on" : ""}" data-action="toggle-outline"></button></div></div>
-            <div class="toggle-box"><div class="toggle-row"><div><strong>안전 모드</strong><div class="small muted" style="margin-top:6px;">원본 템플릿 직접 수정 차단</div></div><button class="switch ${state.safeMode ? "on" : ""}" data-action="toggle-safe"></button></div></div>
-            <button class="button ghost" data-action="open-checklist">배포 전 체크리스트 보기</button>
-            <button class="button primary" data-action="open-impact">운영 반영 시뮬레이터</button>
+            <input id="operatorName" class="text-input" value="${escapeHtml(state.operatorDraft.name)}" placeholder="이름" />
+            <input id="operatorLoginId" class="text-input" value="${escapeHtml(state.operatorDraft.loginId)}" placeholder="아이디" />
+            <input id="operatorPhone" class="text-input" value="${escapeHtml(state.operatorDraft.phone)}" placeholder="연락처" />
+            <select id="operatorRole" class="select">
+              ${["관리자", "검수 담당", "일반 운영자"].map((role) => `<option value="${role}" ${state.operatorDraft.role === role ? "selected" : ""}>${role}</option>`).join("")}
+            </select>
+            <div class="button-row">
+              <button class="button secondary" data-action="reset-operator">초기화</button>
+              <button class="button primary" data-action="save-operator">${state.editingOperatorId ? "운영자 수정" : "운영자 생성"}</button>
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function mallSection() {
+  return `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">몰 정보</h2>
+          <div class="card-description">몰 기본 정보와 운영 상태를 확인합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="key-value">
+            <div class="key-value-row"><span>몰명</span><strong>Golden Bee</strong></div>
+            <div class="key-value-row"><span>도메인</span><strong>goldenbee.co.kr</strong></div>
+            <div class="key-value-row"><span>운영 상태</span><strong>운영중</strong></div>
+            <div class="key-value-row"><span>기본 연락처</span><strong>010-0000-0000</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">상담 연결</h2>
+          <div class="card-description">고객 상담 채널 또는 상담 내역 연결 정보를 관리합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="summary-box">카카오톡 상담 연결 준비중</div>
+          <div class="button-row" style="margin-top:18px;"><button class="button secondary">상담 연결 관리</button></div>
         </div>
       </div>
     </div>
@@ -942,7 +1142,8 @@ function contentSection() {
   if (state.activeNav === "dashboard") return dashboardSection();
   if (state.activeNav === "templates") return templatesSection();
   if (state.activeNav === "mappings") return mappingsSection();
-  if (state.activeNav === "pdf") return pdfSection();
+  if (state.activeNav === "file") return fileSection();
+  if (state.activeNav === "mall") return mallSection();
   if (state.activeNav === "logs") return logsSection();
   return settingsSection();
 }
@@ -953,12 +1154,12 @@ function checklistSheet() {
     <aside class="side-panel ${state.checklistOpen ? "open" : ""}">
       <div class="side-panel-header">
         <div class="modal-head">
-          <div><h2 class="card-title">배포 전 체크리스트</h2><div class="card-description">주문 관리는 카페24에서 하고, 이 콘솔은 PDF와 템플릿만 점검합니다.</div></div>
+          <div><h2 class="card-title">배포 전 체크리스트</h2><div class="card-description">주문 관리는 카페24에서 하고, 이 콘솔은 EPS와 템플릿만 점검합니다.</div></div>
           <button class="close-button" data-action="close-checklist">닫기</button>
         </div>
       </div>
       <div class="side-panel-body">
-        ${["상품별 템플릿 ID 매핑 확인", "옵션셋 기본값 확인", "문구 최대 길이 / 줄 수 확인", "PDF 아웃라인 적용 테스트", "실패 로그 노출 여부 확인", "운영 반영 버전 기록"].map((item) => `<div class="row-box">${item}</div>`).join("")}
+        ${["상품별 템플릿 ID 매핑 확인", "옵션셋 기본값 확인", "문구 최대 길이 / 줄 수 확인", "EPS 아웃라인 적용 테스트", "실패 로그 노출 여부 확인", "운영 반영 버전 기록"].map((item) => `<div class="row-box">${item}</div>`).join("")}
       </div>
     </aside>
   `;
@@ -976,7 +1177,7 @@ function impactModal() {
         <div class="list-stack" style="margin-top:16px;">
           <div class="soft-box">영향 상품: 3개</div>
           <div class="soft-box">변경 항목: 문구 Y 좌표, 캘리 기본값</div>
-          <div class="soft-box">재검수 필요: PDF 샘플 2건</div>
+          <div class="soft-box">재검수 필요: EPS 샘플 2건</div>
         </div>
       </div>
     </div>
@@ -1231,6 +1432,19 @@ function bindActions() {
         state.selectedProductId = id;
         syncPreviewFromSelectedProduct();
       }
+      if (action === "edit-template-product") {
+        const target = state.products.find((product) => product.id === id);
+        if (target) {
+          state.templateDraft.name = target.name;
+          state.templateDraft.shape = target.shape;
+          state.templateDraft.font = target.font;
+          state.templateDraft.linkedOptionSetIds = [...target.optionSetIds];
+          state.templateTab = "create";
+        }
+      }
+      if (action === "disable-template-product") {
+        state.products = state.products.map((product) => product.id === id ? { ...product, status: "미사용" } : product);
+      }
       if (action === "select-mapping-product") {
         state.selectedProductId = id;
         const selected = getSelectedProduct();
@@ -1242,16 +1456,19 @@ function bindActions() {
       if (action === "calli") state.calliColor = value;
       if (action === "toggle-safe") state.safeMode = !state.safeMode;
       if (action === "toggle-outline") state.autoOutline = !state.autoOutline;
-      if (action === "pdf-filter") state.pdfFilter = value;
+      if (action === "file-filter") state.fileFilter = value;
       if (action === "republish") {
         const numeric = Number(state.templateVersion.replace("v", ""));
         state.templateVersion = `v${(numeric + 0.1).toFixed(1)}`;
       }
-      if (action === "retry-pdf") {
-        state.pdfJobs = state.pdfJobs.map((job) => job.id === id ? { ...job, status: "성공", issue: "-", createdAt: "2026-04-20 09:22" } : job);
+      if (action === "retry-file") {
+        state.fileJobs = state.fileJobs.map((job) => job.id === id ? { ...job, status: "성공", issue: "-", createdAt: "2026-04-20 09:22" } : job);
       }
-      if (action === "download-pdf") {
-        state.pdfJobs = state.pdfJobs.map((job) => job.id === id ? { ...job, downloadStatus: "다운로드완료" } : job);
+      if (action === "download-file") {
+        state.fileJobs = state.fileJobs.map((job) => job.id === id ? { ...job, downloadStatus: "다운로드완료" } : job);
+      }
+      if (action === "preview-file") {
+        state.previewFileJobId = state.previewFileJobId === id ? null : id;
       }
       if (action === "save-mapping") {
         const chosen = templateCatalog().find((item) => item.template === state.mappingTemplateId);
@@ -1274,6 +1491,7 @@ function bindActions() {
           );
         }
       }
+      if (action === "toggle-mapping-history") state.mappingHistoryOpen = !state.mappingHistoryOpen;
       if (action === "open-checklist") state.checklistOpen = true;
       if (action === "close-checklist") state.checklistOpen = false;
       if (action === "open-impact") state.impactModalOpen = true;
@@ -1318,6 +1536,49 @@ function bindActions() {
         state.optionSetDraft.type = value;
         refreshOptionSetDraftId();
       }
+      if (action === "toggle-source-safe") state.sourceDraft.safeLine = !state.sourceDraft.safeLine;
+      if (action === "reset-source-draft") resetSourceDraft(state.sourceDraft.shape);
+      if (action === "save-source-rule") {
+        const rule = {
+          id: state.editingSourceId || nextSourceId(state.sourceDraft.shape),
+          shape: state.sourceDraft.shape,
+          widthMm: Number(state.sourceDraft.widthMm || 0),
+          heightMm: Number(state.sourceDraft.heightMm || 0),
+          copyX: Number(state.sourceDraft.copyX || 50),
+          copyY: Number(state.sourceDraft.copyY || 47),
+          maxChars: Number(state.sourceDraft.maxChars || 25),
+          maxLines: Number(state.sourceDraft.maxLines || 3),
+          safeLine: state.sourceDraft.safeLine,
+          safeValue: Number(state.sourceDraft.safeValue || 0),
+          updatedAt: "2026-04-21 11:40",
+        };
+        state.sourceRules = state.editingSourceId
+          ? state.sourceRules.map((item) => item.id === state.editingSourceId ? rule : item)
+          : [rule, ...state.sourceRules];
+        applyTemplateShapePreset(rule.shape, { preserveSize: false });
+        resetSourceDraft(rule.shape);
+      }
+      if (action === "edit-source-rule") {
+        const target = state.sourceRules.find((rule) => rule.id === id);
+        if (target) {
+          state.sourceDraft = {
+            shape: target.shape,
+            widthMm: String(target.widthMm),
+            heightMm: String(target.heightMm),
+            copyX: String(target.copyX),
+            copyY: String(target.copyY),
+            maxChars: String(target.maxChars),
+            maxLines: String(target.maxLines),
+            safeLine: target.safeLine,
+            safeValue: String(target.safeValue),
+          };
+          state.editingSourceId = target.id;
+        }
+      }
+      if (action === "delete-source-rule") {
+        state.sourceRules = state.sourceRules.filter((rule) => rule.id !== id);
+        if (state.editingSourceId === id) resetSourceDraft();
+      }
       if (action === "add-option-item") {
         state.optionSetDraft.items = [...state.optionSetDraft.items, { name: "", code: "" }];
       }
@@ -1332,6 +1593,24 @@ function bindActions() {
       }
       if (action === "set-default-option-item") {
         state.optionSetDraft.defaultIndex = Number(id);
+      }
+      if (action === "edit-option-set") {
+        const target = state.optionSets.find((set) => set.id === id);
+        if (target) {
+          const matchedType = OPTION_SET_TYPES.find((type) => target.id.startsWith(type.prefix)) || OPTION_SET_TYPES[0];
+          state.optionSetDraft = {
+            id: target.id,
+            type: matchedType.key,
+            title: target.title,
+            items: target.values.map((value) => ({ name: getOptionValueName(value), code: getOptionValueCode(value) })),
+            defaultIndex: Math.max(0, target.values.findIndex((value) => getOptionValueName(value) === target.defaultValue)),
+          };
+          state.editingOptionSetId = target.id;
+          state.templateTab = "options";
+        }
+      }
+      if (action === "delete-option-set") {
+        state.optionSets = state.optionSets.map((set) => set.id === id ? { ...set, active: false } : set);
       }
       if (action === "create-template-inline") {
         const nextIndex = state.products.length + 101;
@@ -1365,20 +1644,49 @@ function bindActions() {
           .map((item) => ({ name: item.name.trim(), code: item.code.trim() }))
           .filter((item) => item.name);
         const defaultItem = values[state.optionSetDraft.defaultIndex] || values[0];
-        state.optionSets = [
-          {
-            id: state.optionSetDraft.id || generateOptionSetId(state.optionSetDraft.type),
-            title: state.optionSetDraft.title || getOptionSetTypeMeta(state.optionSetDraft.type).title,
-            values,
-            defaultValue: defaultItem ? defaultItem.name : "",
-            active: true,
-          },
-          ...state.optionSets,
-        ];
+        const nextSet = {
+          id: state.editingOptionSetId || state.optionSetDraft.id || generateOptionSetId(state.optionSetDraft.type),
+          title: state.optionSetDraft.title || getOptionSetTypeMeta(state.optionSetDraft.type).title,
+          values,
+          defaultValue: defaultItem ? defaultItem.name : "",
+          active: true,
+        };
+        state.optionSets = state.editingOptionSetId
+          ? state.optionSets.map((set) => set.id === state.editingOptionSetId ? nextSet : set)
+          : [nextSet, ...state.optionSets];
         resetOptionSetDraft();
       }
       if (action === "reset-template-draft") {
         resetTemplateDraft();
+      }
+      if (action === "reset-option-set-draft") {
+        resetOptionSetDraft();
+      }
+      if (action === "edit-operator") {
+        const target = state.operators.find((operator) => operator.id === id);
+        if (target) {
+          state.operatorDraft = { name: target.name, loginId: target.loginId, phone: target.phone, role: target.role };
+          state.editingOperatorId = target.id;
+        }
+      }
+      if (action === "delete-operator") {
+        state.operators = state.operators.filter((operator) => operator.id !== id);
+        if (state.editingOperatorId === id) resetOperatorDraft();
+      }
+      if (action === "reset-operator") resetOperatorDraft();
+      if (action === "save-operator") {
+        const operator = {
+          id: state.editingOperatorId || nextOperatorId(),
+          name: state.operatorDraft.name || "신규 운영자",
+          loginId: state.operatorDraft.loginId || "new_operator",
+          phone: state.operatorDraft.phone || "-",
+          role: state.operatorDraft.role,
+          memo: state.operatorDraft.role === "관리자" ? "전체 관리 가능" : state.operatorDraft.role === "검수 담당" ? "EPS 미리보기와 재생성 가능" : "상품 연결과 파일 다운로드 가능",
+        };
+        state.operators = state.editingOperatorId
+          ? state.operators.map((item) => item.id === state.editingOperatorId ? operator : item)
+          : [operator, ...state.operators];
+        resetOperatorDraft();
       }
       renderApp();
     });
@@ -1397,7 +1705,7 @@ function bindInputs() {
     });
   }
 
-  bindSearchInput("#pdfSearchInput", "pdfSearch");
+  bindSearchInput("#fileSearchInput", "fileSearch");
   bindSearchInput("#templateProductSearch", "templateProductSearch");
   bindSearchInput("#mappingSearchInput", "mappingSearch");
 
@@ -1426,7 +1734,8 @@ function bindInputs() {
   const draftShape = document.querySelector("#draftShape");
   if (draftShape) {
     draftShape.addEventListener("change", (event) => {
-      state.templateDraft.shape = event.target.value;
+      applyTemplateShapePreset(event.target.value);
+      renderApp();
     });
   }
 
@@ -1520,6 +1829,45 @@ function bindInputs() {
       state.optionSetDraft.defaultValue = event.target.value;
     });
   }
+
+  document.querySelectorAll("[data-option-item-name]").forEach((input) => {
+    input.addEventListener("input", (event) => {
+      const index = Number(event.target.dataset.optionItemName);
+      state.optionSetDraft.items[index].name = event.target.value;
+    });
+  });
+
+  document.querySelectorAll("[data-option-item-code]").forEach((input) => {
+    input.addEventListener("input", (event) => {
+      const index = Number(event.target.dataset.optionItemCode);
+      state.optionSetDraft.items[index].code = event.target.value;
+    });
+  });
+
+  bindSearchInput("#sourceSearchInput", "sourceSearch");
+
+  const sourceShape = document.querySelector("#sourceShape");
+  if (sourceShape) {
+    sourceShape.addEventListener("change", (event) => {
+      resetSourceDraft(event.target.value);
+      renderApp();
+    });
+  }
+
+  document.querySelectorAll("[data-source-field]").forEach((input) => {
+    input.addEventListener("input", (event) => {
+      state.sourceDraft[event.target.dataset.sourceField] = event.target.value;
+    });
+  });
+
+  const operatorName = document.querySelector("#operatorName");
+  if (operatorName) operatorName.addEventListener("input", (event) => { state.operatorDraft.name = event.target.value; });
+  const operatorLoginId = document.querySelector("#operatorLoginId");
+  if (operatorLoginId) operatorLoginId.addEventListener("input", (event) => { state.operatorDraft.loginId = event.target.value; });
+  const operatorPhone = document.querySelector("#operatorPhone");
+  if (operatorPhone) operatorPhone.addEventListener("input", (event) => { state.operatorDraft.phone = event.target.value; });
+  const operatorRole = document.querySelector("#operatorRole");
+  if (operatorRole) operatorRole.addEventListener("change", (event) => { state.operatorDraft.role = event.target.value; });
 }
 
 function renderApp() {
@@ -1528,7 +1876,7 @@ function renderApp() {
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">${icons.pdfFile}</div>
+          <div class="brand-mark">${icons.fileFile}</div>
           <div>
             <div class="brand-sub">Golden Bee</div>
             <div class="brand-title">Admin Console</div>
@@ -1541,7 +1889,7 @@ function renderApp() {
           <div class="icon-label"><span>${icons.clock}</span><strong>현재 기준</strong></div>
           <ul>
             <li>주문 관리는 카페24</li>
-            <li>이 콘솔의 역할: 템플릿 관리 / PDF 검수 / 오류 확인</li>
+            <li>이 콘솔의 역할: 템플릿 관리 / EPS 검수 / 오류 확인</li>
             <li>불포함 기능: 복잡한 주문 처리 / 확정 워크플로우</li>
           </ul>
         </div>
