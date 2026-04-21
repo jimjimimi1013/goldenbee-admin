@@ -355,7 +355,6 @@ function pdfSection() {
                 <div class="button-row">
                   <button class="button secondary">미리보기</button>
                   <button class="button secondary">PDF 다운로드</button>
-                  <button class="button secondary">원본 JSON</button>
                   ${job.status !== "성공" ? `<button class="button primary" data-action="retry-pdf" data-id="${job.id}">재생성</button>` : ""}
                 </div>
               </div>
