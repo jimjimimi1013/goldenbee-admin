@@ -14,7 +14,7 @@ const icons = {
 const navItems = [
   { id: "dashboard", label: "대시보드", icon: icons.dashboard },
   { id: "templates", label: "템플릿 관리", icon: icons.templates },
-  { id: "typography", label: "문구 / 폰트 / 좌표", icon: icons.typography },
+  { id: "mappings", label: "상품 연결 관리", icon: icons.options },
   { id: "pdf", label: "PDF 파일 / 검수", icon: icons.pdf },
   { id: "logs", label: "오류 로그", icon: icons.logs },
   { id: "settings", label: "환경설정 / 권한", icon: icons.settings },
@@ -24,6 +24,7 @@ const state = {
   activeNav: "dashboard",
   templateTab: "create",
   search: "",
+  mappingSearch: "",
   pdfSearch: "",
   templateProductSearch: "",
   products: [
@@ -32,12 +33,12 @@ const state = {
     { id: "P-103", name: "부모님 트로피 정사각형 C", cafe24: "product_no_103", template: "TPL-SQ-01", shape: "정사각형", font: "Pretendard SemiBold", optionSetIds: ["OPT-FRAME-01", "OPT-BG-01", "OPT-CALLI-01"], copyX: 50, copyY: 46, maxChars: 22, maxLines: 2, status: "테스트중", updatedAt: "2026-04-18 15:40" },
   ],
   optionSets: [
-    { id: "OPT-FRAME-01", title: "프레임 컬러", values: ["골드", "실버", "블랙"], defaultValue: "골드", active: true },
-    { id: "OPT-BG-01", title: "배경 컬러", values: ["아이보리", "웜그레이", "차콜"], defaultValue: "아이보리", active: true },
-    { id: "OPT-CALLI-01", title: "캘리 컬러", values: ["골드", "실버"], defaultValue: "골드", active: true },
-    { id: "OPT-WEIGHT-01", title: "금 스티커 중량", values: ["0.1g", "0.2g", "0.3g"], defaultValue: "0.1g", active: true },
-    { id: "OPT-TITLE-COLOR-01", title: "메인타이틀 캘리 색상", values: ["골드", "실버", "블랙"], defaultValue: "골드", active: true },
-    { id: "OPT-SUBTITLE-COLOR-01", title: "서브타이틀 문구 색상", values: ["블랙", "그레이", "브라운"], defaultValue: "블랙", active: true },
+    { id: "OPT-FRAME-01", title: "?????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }, { name: "??", code: "#111111" }], defaultValue: "??", active: true },
+    { id: "OPT-BG-01", title: "????", values: [{ name: "????", code: "#F4EFE6" }, { name: "????", code: "#C8C2B8" }, { name: "??", code: "#464646" }], defaultValue: "????", active: true },
+    { id: "OPT-CALLI-01", title: "????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }], defaultValue: "??", active: true },
+    { id: "OPT-WEIGHT-01", title: "? ??? ??", values: [{ name: "0.1g", code: "" }, { name: "0.2g", code: "" }, { name: "0.3g", code: "" }], defaultValue: "0.1g", active: true },
+    { id: "OPT-TITLE-COLOR-01", title: "????? ????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }, { name: "??", code: "#111111" }], defaultValue: "??", active: true },
+    { id: "OPT-SUBTITLE-COLOR-01", title: "????", values: [{ name: "??", code: "#111111" }, { name: "???", code: "#767676" }, { name: "???", code: "#6B4C35" }], defaultValue: "??", active: true },
   ],
   pdfJobs: [
     { id: "JOB-240420-001", orderRef: "CAFE24-54821", customerName: "김민준", customerPhone: "010-2451-8821", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 골드 / 0.1g", template: "TPL-SQ-01", status: "성공", downloadStatus: "다운로드대기", createdAt: "2026-04-20 08:52", issue: "-" },
@@ -75,8 +76,9 @@ const state = {
   templateConfirmOpen: false,
   optionSetCreateOpen: false,
   optionSetPickerOpen: false,
+  mappingTemplateId: "TPL-SQ-01",
   templateDraft: {
-    templateId: "TPL-SQ-04",
+    templateId: "",
     name: "",
     shape: "정사각형",
     widthMm: "",
@@ -93,16 +95,102 @@ const state = {
     linkedProductName: "",
   },
   optionSetDraft: {
-    id: "OPT-NEW-01",
-    title: "",
-    values: "",
-    defaultValue: "",
+    id: "",
+    type: "frame",
+    title: "?????",
+    items: [{ name: "??", code: "#C8A44D" }],
+    defaultIndex: 0,
   },
 };
 
+
+const SHAPE_PRESETS = {
+  "????": { widthMm: "180", heightMm: "180", copyX: "50", copyY: "47", maxChars: "25", maxLines: "3" },
+  "????": { widthMm: "240", heightMm: "180", copyX: "48", copyY: "45", maxChars: "28", maxLines: "3" },
+};
+
+const OPTION_SET_TYPES = [
+  { key: "frame", title: "?????", prefix: "OPT-FRAME" },
+  { key: "bg", title: "????", prefix: "OPT-BG" },
+  { key: "calli", title: "????", prefix: "OPT-CALLI" },
+  { key: "text", title: "????", prefix: "OPT-TEXT" },
+];
+
+function getShapePreset(shape) {
+  const fallback = SHAPE_PRESETS[shape] || SHAPE_PRESETS["????"];
+  const matched = state.products.find((product) => product.shape === shape);
+  if (!matched) return fallback;
+  return {
+    widthMm: fallback.widthMm,
+    heightMm: fallback.heightMm,
+    copyX: String(matched.copyX ?? fallback.copyX),
+    copyY: String(matched.copyY ?? fallback.copyY),
+    maxChars: String(matched.maxChars ?? fallback.maxChars),
+    maxLines: String(matched.maxLines ?? fallback.maxLines),
+  };
+}
+
+function getTemplatePrefix(shape) {
+  return shape === "????" ? "TPL-RE" : "TPL-SQ";
+}
+
+function nextSequenceFromIds(ids, prefix) {
+  return ids.reduce((max, id) => {
+    const match = String(id).match(new RegExp(`^${prefix}-(\\d+)$`));
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0) + 1;
+}
+
+function generateTemplateId(shape) {
+  const prefix = getTemplatePrefix(shape);
+  const next = nextSequenceFromIds(state.products.map((product) => product.template), prefix);
+  return `${prefix}-${String(next).padStart(2, "0")}`;
+}
+
+function getOptionSetTypeMeta(type) {
+  return OPTION_SET_TYPES.find((item) => item.key === type) || OPTION_SET_TYPES[0];
+}
+
+function generateOptionSetId(type) {
+  const meta = getOptionSetTypeMeta(type);
+  const next = nextSequenceFromIds(state.optionSets.map((set) => set.id), meta.prefix);
+  return `${meta.prefix}-${String(next).padStart(2, "0")}`;
+}
+
+function applyTemplateShapePreset(shape, options = {}) {
+  const preset = getShapePreset(shape);
+  state.templateDraft.shape = shape;
+  state.templateDraft.templateId = generateTemplateId(shape);
+  state.templateDraft.copyX = preset.copyX;
+  state.templateDraft.copyY = preset.copyY;
+  state.templateDraft.maxChars = preset.maxChars;
+  state.templateDraft.maxLines = preset.maxLines;
+  if (!options.preserveSize) {
+    state.templateDraft.widthMm = preset.widthMm;
+    state.templateDraft.heightMm = preset.heightMm;
+  }
+}
+
+function refreshTemplateDraftId() {
+  state.templateDraft.templateId = generateTemplateId(state.templateDraft.shape);
+}
+
+function refreshOptionSetDraftId() {
+  state.optionSetDraft.id = generateOptionSetId(state.optionSetDraft.type);
+  state.optionSetDraft.title = getOptionSetTypeMeta(state.optionSetDraft.type).title;
+}
+
+function getOptionValueName(value) {
+  return typeof value === "string" ? value : value?.name || "";
+}
+
+function getOptionValueCode(value) {
+  return typeof value === "string" ? "" : value?.code || "";
+}
+
 function resetTemplateDraft() {
   state.templateDraft = {
-    templateId: "TPL-SQ-04",
+    templateId: "",
     name: "",
     shape: "정사각형",
     widthMm: "",
@@ -118,18 +206,20 @@ function resetTemplateDraft() {
     linkedProductId: "",
     linkedProductName: "",
   };
+  applyTemplateShapePreset(state.templateDraft.shape);
   state.templateProductSearch = "";
 }
 
 function resetOptionSetDraft() {
   state.optionSetDraft = {
-    id: `OPT-NEW-${String(state.optionSets.length + 1).padStart(2, "0")}`,
-    title: "",
-    values: "",
-    defaultValue: "",
+    id: "",
+    type: "frame",
+    title: "?????",
+    items: [{ name: "??", code: "#C8A44D" }],
+    defaultIndex: 0,
   };
+  refreshOptionSetDraftId();
 }
-
 function getSelectedProduct() {
   return state.products.find((product) => product.id === state.selectedProductId) || state.products[0];
 }
@@ -145,6 +235,37 @@ function filteredProducts() {
   const keyword = state.search.trim().toLowerCase();
   if (!keyword) return state.products;
   return state.products.filter((item) => [item.name, item.template, item.cafe24].some((value) => value.toLowerCase().includes(keyword)));
+}
+
+function filteredMappings() {
+  const keyword = state.mappingSearch.trim().toLowerCase();
+  if (!keyword) return state.products;
+  return state.products.filter((item) =>
+    [item.name, item.template, item.cafe24].some((value) =>
+      value.toLowerCase().includes(keyword),
+    ),
+  );
+}
+
+function templateCatalog() {
+  const seen = new Set();
+  return state.products
+    .filter((item) => {
+      if (seen.has(item.template)) return false;
+      seen.add(item.template);
+      return true;
+    })
+    .map((item) => ({
+      template: item.template,
+      label: `${item.template} · ${item.shape} 기본 템플릿`,
+      shape: item.shape,
+      font: item.font,
+      optionSetIds: item.optionSetIds || [],
+      copyX: item.copyX,
+      copyY: item.copyY,
+      maxChars: item.maxChars,
+      maxLines: item.maxLines,
+    }));
 }
 
 function filteredPdfJobs() {
@@ -178,6 +299,17 @@ function bindSearchInput(selector, stateKey) {
   if (!input) return;
 
   let composing = false;
+  const rerenderWithFocus = (value, caret) => {
+    state[stateKey] = value;
+    renderApp();
+    const nextInput = document.querySelector(selector);
+    if (nextInput) {
+      nextInput.focus();
+      if (typeof caret === "number") {
+        nextInput.setSelectionRange(caret, caret);
+      }
+    }
+  };
 
   input.addEventListener("compositionstart", () => {
     composing = true;
@@ -185,14 +317,13 @@ function bindSearchInput(selector, stateKey) {
 
   input.addEventListener("compositionend", (event) => {
     composing = false;
-    state[stateKey] = event.target.value;
-    renderApp();
+    rerenderWithFocus(event.target.value, event.target.selectionStart);
   });
 
   input.addEventListener("input", (event) => {
     state[stateKey] = event.target.value;
     if (!composing) {
-      renderApp();
+      rerenderWithFocus(event.target.value, event.target.selectionStart);
     }
   });
 }
@@ -327,10 +458,10 @@ function templatesSection() {
             <span class="field-label">템플릿 이름</span>
             <input id="draftName" class="text-input" value="${escapeHtml(state.templateDraft.name)}" placeholder="예: 정사각 신규 템플릿" />
           </label>
-          <label class="form-field">
-            <span class="field-label">템플릿 ID</span>
-            <input id="draftTemplateId" class="text-input" value="${escapeHtml(state.templateDraft.templateId)}" placeholder="예: TPL-SQ-01" />
-          </label>
+          <div class="form-field">
+            <span class="field-label">??? ID</span>
+            <div class="summary-box" style="padding:14px 16px;">${escapeHtml(state.templateDraft.templateId)}</div>
+          </div>
           <label class="form-field">
             <span class="field-label">액자 형태</span>
             <select id="draftShape" class="select">
@@ -364,6 +495,7 @@ function templatesSection() {
               <div class="key-value-row"><span>글자수 제한</span><strong><input id="draftMaxChars" class="text-input" value="${escapeHtml(state.templateDraft.maxChars)}" style="width:88px;padding:8px 10px;" /></strong></div>
               <div class="key-value-row"><span>자동 아웃라인</span><strong>사용</strong></div>
             </div>
+            <div class="tiny muted" style="margin-top:12px;">?? ??? ??? ?? ??? ?? ??? ??? ???? ?????.</div>
           </div>
           <div class="summary-box">
             <div style="font-weight:700;">생성 후 상태</div>
@@ -465,25 +597,24 @@ function templatesSection() {
         </div>
         <div class="card-body">
           <div class="form-grid">
-            <label class="form-field">
-              <span class="field-label">옵션셋 ID</span>
-              <input id="optionSetId" class="text-input" value="${escapeHtml(state.optionSetDraft.id)}" placeholder="예: OPT-FRAME-01" />
-            </label>
-            <label class="form-field">
-              <span class="field-label">옵션셋 이름</span>
-              <input id="optionSetTitle" class="text-input" value="${escapeHtml(state.optionSetDraft.title)}" placeholder="예: 프레임 컬러" />
-            </label>
-            <label class="form-field full">
-              <span class="field-label">옵션 값</span>
-              <input id="optionSetValues" class="text-input" value="${escapeHtml(state.optionSetDraft.values)}" placeholder="예: 골드, 실버, 블랙" />
-            </label>
-            <label class="form-field full">
-              <span class="field-label">기본값</span>
-              <input id="optionSetDefault" class="text-input" value="${escapeHtml(state.optionSetDraft.defaultValue)}" placeholder="예: 골드" />
-            </label>
+            <div class="form-field">
+              <span class="field-label">??? ID</span>
+              <div class="summary-box" style="padding:14px 16px;">${escapeHtml(state.optionSetDraft.id)}</div>
+            </div>
+            <div class="form-field full">
+              <span class="field-label">??? ??</span>
+              <div class="chip-group">${OPTION_SET_TYPES.map((type) => `<button class="${chooseButton(state.optionSetDraft.type === type.key)}" data-action="select-option-type" data-value="${type.key}">${type.title}</button>`).join("")}</div>
+            </div>
+            <div class="form-field full">
+              <span class="field-label">??? / ????</span>
+              <div class="option-item-stack">${state.optionSetDraft.items.map((item, index) => `<div class="option-item-row"><input class="text-input" data-option-item-name="${index}" value="${escapeHtml(item.name)}" placeholder="???" /><input class="text-input" data-option-item-code="${index}" value="${escapeHtml(item.code)}" placeholder="#C8A44D" /><button class="${chooseButton(state.optionSetDraft.defaultIndex === index)}" data-action="set-default-option-item" data-id="${index}">???</button><button class="button secondary" data-action="remove-option-item" data-id="${index}">??</button></div>`).join("")}</div>
+              <div class="button-row" style="margin-top:12px;">
+                <button class="button secondary" data-action="add-option-item">+ ??? ??</button>
+              </div>
+            </div>
           </div>
           <div class="button-row" style="margin-top:18px;">
-            <button class="button primary" data-action="confirm-option-set-create">옵션/색상셋 생성</button>
+            <button class="button primary" data-action="confirm-option-set-create">??/??? ??</button>
           </div>
         </div>
       </div>
@@ -503,7 +634,7 @@ function templatesSection() {
                   </div>
                   <span class="${set.active ? "badge success" : "badge neutral"}">${set.active ? "활성" : "비활성"}</span>
                 </div>
-                <div class="chip-group" style="margin-top:12px;">${set.values.map((value) => `<span class="badge neutral">${escapeHtml(value)}</span>`).join("")}</div>
+                <div class="chip-group" style="margin-top:12px;">${set.values.map((value) => `<span class="badge neutral">${escapeHtml(getOptionValueName(value))}${getOptionValueCode(value) ? ` (${escapeHtml(getOptionValueCode(value))})` : ""}</span>`).join("")}</div>
                 <div class="tiny muted" style="margin-top:10px;">기본값: ${escapeHtml(set.defaultValue)}</div>
               </div>
             `).join("")}
@@ -516,11 +647,12 @@ function templatesSection() {
   return `
     <div class="content-area">
       <div class="tab-row">
-        <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. 템플릿 생성</button>
-        <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. 템플릿 리스트</button>
-        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. 옵션 / 색상셋</button>
+        <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. ????????</button>
+        <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. ??????????/button>
+        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. ??? / ?????/button>
+        <button class="tab-button ${state.templateTab === "typography" ? "active" : ""}" data-action="template-tab" data-value="typography">4. ??? / ??? / ???</button>
       </div>
-      ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : optionTab}
+      ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : state.templateTab === "options" ? optionTab : typographySection()}
     </div>
   `;
 }
@@ -651,6 +783,93 @@ function pdfSection() {
   `;
 }
 
+function mappingsSection() {
+  const selected = getSelectedProduct();
+  const templates = templateCatalog();
+  const currentTemplate = templates.find((item) => item.template === state.mappingTemplateId) || templates[0];
+  return `
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">카페24 상품 연결 관리</h2>
+          <div class="card-description">생성된 템플릿을 카페24 상품과 연결하는 별도 관리 화면</div>
+        </div>
+        <div class="card-body">
+          <div class="product-search">
+            <input id="mappingSearchInput" class="text-input" value="${escapeHtml(state.mappingSearch)}" placeholder="상품명, 카페24 상품번호, 템플릿 ID 검색" />
+          </div>
+          <div class="product-list" style="margin-top:14px;">
+            ${filteredMappings().map((item) => `
+              <button class="product-button ${item.id === selected.id ? "active" : ""}" data-action="select-mapping-product" data-id="${item.id}">
+                <div class="job-top">
+                  <div>
+                    <div style="font-weight:700;">${escapeHtml(item.name)}</div>
+                    <div style="margin-top:8px;"><span class="${badgeClass(item.status)}">${escapeHtml(item.status)}</span></div>
+                  </div>
+                  <span class="tiny ${item.id === selected.id ? "" : "muted"}">${escapeHtml(item.updatedAt)}</span>
+                </div>
+                <div class="product-meta-grid ${item.id === selected.id ? "" : "muted"}">
+                  <div>카페24: ${escapeHtml(item.cafe24)}</div>
+                  <div>템플릿: ${escapeHtml(item.template)}</div>
+                  <div>형태: ${escapeHtml(item.shape)}</div>
+                  <div>폰트: ${escapeHtml(item.font)}</div>
+                </div>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">${escapeHtml(selected.name)}</h2>
+          <div class="card-description">상품 상세에서 어떤 템플릿을 사용할지 연결하는 실제 운영 화면</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <label class="form-field">
+              <span class="field-label">카페24 상품번호</span>
+              <input class="text-input" value="${escapeHtml(selected.cafe24)}" readonly />
+            </label>
+            <label class="form-field">
+              <span class="field-label">연결 템플릿</span>
+              <select id="mappingTemplateSelect" class="select">
+                ${templates.map((item) => `<option value="${item.template}" ${item.template === state.mappingTemplateId ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}
+              </select>
+            </label>
+          </div>
+
+          <div class="grid-2" style="margin-top:18px;">
+            <div class="summary-box">
+              <div style="font-weight:700;">현재 연결 기준</div>
+              <div class="key-value" style="margin-top:16px;">
+                <div class="key-value-row"><span>상품명</span><strong>${escapeHtml(selected.name)}</strong></div>
+                <div class="key-value-row"><span>템플릿 ID</span><strong>${escapeHtml(currentTemplate ? currentTemplate.template : selected.template)}</strong></div>
+                <div class="key-value-row"><span>액자 형태</span><strong>${escapeHtml(currentTemplate ? currentTemplate.shape : selected.shape)}</strong></div>
+                <div class="key-value-row"><span>폰트</span><strong>${escapeHtml(currentTemplate ? currentTemplate.font : selected.font)}</strong></div>
+                <div class="key-value-row"><span>옵션셋</span><strong>${escapeHtml(currentTemplate ? optionSetSummary(currentTemplate.optionSetIds) : optionSetSummary(selected.optionSetIds))}</strong></div>
+              </div>
+            </div>
+            <div class="summary-box">
+              <div style="font-weight:700;">운영 주의사항</div>
+              <ul class="small muted" style="margin:12px 0 0;padding-left:18px;line-height:1.7;">
+                <li>상품 연결은 주문 관리가 아니라 렌더링 기준 지정입니다.</li>
+                <li>잘못 연결하면 미리보기와 출력 결과가 함께 틀어집니다.</li>
+                <li>템플릿 변경 후 샘플 EPS 재검수가 필요합니다.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="button-row" style="margin-top:18px;">
+            <button class="button secondary">이전 연결 보기</button>
+            <button class="button primary" data-action="save-mapping">연결 저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function logsSection() {
   return `
     <div class="grid-main">
@@ -722,8 +941,7 @@ function settingsSection() {
 function contentSection() {
   if (state.activeNav === "dashboard") return dashboardSection();
   if (state.activeNav === "templates") return templatesSection();
-  if (state.activeNav === "options") return optionsSection();
-  if (state.activeNav === "typography") return typographySection();
+  if (state.activeNav === "mappings") return mappingsSection();
   if (state.activeNav === "pdf") return pdfSection();
   if (state.activeNav === "logs") return logsSection();
   return settingsSection();
@@ -1013,6 +1231,12 @@ function bindActions() {
         state.selectedProductId = id;
         syncPreviewFromSelectedProduct();
       }
+      if (action === "select-mapping-product") {
+        state.selectedProductId = id;
+        const selected = getSelectedProduct();
+        state.mappingTemplateId = selected.template;
+        syncPreviewFromSelectedProduct();
+      }
       if (action === "frame") state.frameColor = value;
       if (action === "background") state.bgColor = value;
       if (action === "calli") state.calliColor = value;
@@ -1028,6 +1252,27 @@ function bindActions() {
       }
       if (action === "download-pdf") {
         state.pdfJobs = state.pdfJobs.map((job) => job.id === id ? { ...job, downloadStatus: "다운로드완료" } : job);
+      }
+      if (action === "save-mapping") {
+        const chosen = templateCatalog().find((item) => item.template === state.mappingTemplateId);
+        if (chosen) {
+          state.products = state.products.map((product) =>
+            product.id === state.selectedProductId
+              ? {
+                  ...product,
+                  template: chosen.template,
+                  shape: chosen.shape,
+                  font: chosen.font,
+                  optionSetIds: [...chosen.optionSetIds],
+                  copyX: chosen.copyX,
+                  copyY: chosen.copyY,
+                  maxChars: chosen.maxChars,
+                  maxLines: chosen.maxLines,
+                  updatedAt: "2026-04-21 11:20",
+                }
+              : product,
+          );
+        }
       }
       if (action === "open-checklist") state.checklistOpen = true;
       if (action === "close-checklist") state.checklistOpen = false;
@@ -1069,23 +1314,42 @@ function bindActions() {
           state.templateDraft.linkedOptionSetIds = [...state.templateDraft.linkedOptionSetIds, id];
         }
       }
+      if (action === "select-option-type") {
+        state.optionSetDraft.type = value;
+        refreshOptionSetDraftId();
+      }
+      if (action === "add-option-item") {
+        state.optionSetDraft.items = [...state.optionSetDraft.items, { name: "", code: "" }];
+      }
+      if (action === "remove-option-item") {
+        const index = Number(id);
+        if (state.optionSetDraft.items.length > 1) {
+          state.optionSetDraft.items = state.optionSetDraft.items.filter((_, itemIndex) => itemIndex !== index);
+          if (state.optionSetDraft.defaultIndex >= state.optionSetDraft.items.length) {
+            state.optionSetDraft.defaultIndex = Math.max(0, state.optionSetDraft.items.length - 1);
+          }
+        }
+      }
+      if (action === "set-default-option-item") {
+        state.optionSetDraft.defaultIndex = Number(id);
+      }
       if (action === "create-template-inline") {
         const nextIndex = state.products.length + 101;
         const width = Number(state.templateDraft.widthMm || 0);
         const height = Number(state.templateDraft.heightMm || 0);
         const newProduct = {
           id: `P-${nextIndex}`,
-          name: state.templateDraft.name || `신규 템플릿 ${state.products.length + 1}`,
+          name: state.templateDraft.name || `?? ??? ${state.products.length + 1}`,
           cafe24: state.templateDraft.linkedProductId || "product_unlinked",
-          template: state.templateDraft.templateId || `TPL-${width === height ? "SQ" : "RE"}-${String(state.products.length + 1).padStart(2, "0")}`,
-          shape: state.templateDraft.shape || (width && height && width === height ? "정사각형" : "직사각형"),
+          template: state.templateDraft.templateId || generateTemplateId(state.templateDraft.shape),
+          shape: state.templateDraft.shape || (width && height && width === height ? "????" : "????"),
           font: state.templateDraft.font,
           optionSetIds: [...state.templateDraft.linkedOptionSetIds],
           copyX: Number(state.templateDraft.copyX || 50),
           copyY: Number(state.templateDraft.copyY || 47),
           maxChars: Number(state.templateDraft.maxChars || 25),
           maxLines: Number(state.templateDraft.maxLines || 3),
-          status: "테스트중",
+          status: "????",
           updatedAt: "2026-04-21 10:00",
         };
         state.products = [newProduct, ...state.products];
@@ -1097,13 +1361,16 @@ function bindActions() {
         resetTemplateDraft();
       }
       if (action === "confirm-option-set-create") {
-        const values = state.optionSetDraft.values.split(",").map((item) => item.trim()).filter(Boolean);
+        const values = state.optionSetDraft.items
+          .map((item) => ({ name: item.name.trim(), code: item.code.trim() }))
+          .filter((item) => item.name);
+        const defaultItem = values[state.optionSetDraft.defaultIndex] || values[0];
         state.optionSets = [
           {
-            id: state.optionSetDraft.id || `OPT-NEW-${String(state.optionSets.length + 1).padStart(2, "0")}`,
-            title: state.optionSetDraft.title || "신규 옵션셋",
+            id: state.optionSetDraft.id || generateOptionSetId(state.optionSetDraft.type),
+            title: state.optionSetDraft.title || getOptionSetTypeMeta(state.optionSetDraft.type).title,
             values,
-            defaultValue: state.optionSetDraft.defaultValue || values[0] || "",
+            defaultValue: defaultItem ? defaultItem.name : "",
             active: true,
           },
           ...state.optionSets,
@@ -1132,6 +1399,15 @@ function bindInputs() {
 
   bindSearchInput("#pdfSearchInput", "pdfSearch");
   bindSearchInput("#templateProductSearch", "templateProductSearch");
+  bindSearchInput("#mappingSearchInput", "mappingSearch");
+
+  const mappingTemplateSelect = document.querySelector("#mappingTemplateSelect");
+  if (mappingTemplateSelect) {
+    mappingTemplateSelect.addEventListener("change", (event) => {
+      state.mappingTemplateId = event.target.value;
+      renderApp();
+    });
+  }
 
   const draftName = document.querySelector("#draftName");
   if (draftName) {
@@ -1295,4 +1571,6 @@ function renderApp() {
   bindRanges();
 }
 
+resetTemplateDraft();
+resetOptionSetDraft();
 renderApp();

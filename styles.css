@@ -644,6 +644,18 @@ button {
   gap: 12px;
 }
 
+.option-item-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.option-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
 @media (max-width: 1180px) {
   .grid-4,
   .flow-grid,
@@ -663,6 +675,10 @@ button {
   .sidebar {
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .option-item-row {
+    grid-template-columns: 1fr;
   }
 }
 
