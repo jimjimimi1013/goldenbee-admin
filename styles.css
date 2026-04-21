@@ -404,6 +404,11 @@ button {
   box-shadow: 0 20px 40px rgba(24, 24, 27, 0.16);
 }
 
+.frame-art.rectangle {
+  width: min(100%, 460px);
+  aspect-ratio: 1.45 / 1;
+}
+
 .frame-inner {
   position: relative;
   width: 100%;
@@ -612,6 +617,31 @@ button {
   border-radius: 18px;
   background: #fafafa;
   padding: 14px;
+}
+
+.tab-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.tab-button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #fff;
+}
+
+.tab-button.active {
+  background: var(--black);
+  color: #fff;
+  border-color: var(--black);
+}
+
+.recent-list {
+  display: grid;
+  gap: 12px;
 }
 
 @media (max-width: 1180px) {

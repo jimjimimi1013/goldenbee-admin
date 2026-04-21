@@ -13,8 +13,7 @@ const icons = {
 
 const navItems = [
   { id: "dashboard", label: "대시보드", icon: icons.dashboard },
-  { id: "templates", label: "상품 / 템플릿", icon: icons.templates },
-  { id: "options", label: "옵션 / 색상", icon: icons.options },
+  { id: "templates", label: "템플릿 관리", icon: icons.templates },
   { id: "typography", label: "문구 / 폰트 / 좌표", icon: icons.typography },
   { id: "pdf", label: "PDF 파일 / 검수", icon: icons.pdf },
   { id: "logs", label: "오류 로그", icon: icons.logs },
@@ -23,6 +22,7 @@ const navItems = [
 
 const state = {
   activeNav: "dashboard",
+  templateTab: "create",
   search: "",
   pdfSearch: "",
   templateProductSearch: "",
@@ -74,6 +74,7 @@ const state = {
   productPickerOpen: false,
   templateConfirmOpen: false,
   optionSetCreateOpen: false,
+  optionSetPickerOpen: false,
   templateDraft: {
     templateId: "TPL-SQ-04",
     name: "",
@@ -133,6 +134,13 @@ function getSelectedProduct() {
   return state.products.find((product) => product.id === state.selectedProductId) || state.products[0];
 }
 
+function syncPreviewFromSelectedProduct() {
+  const selected = getSelectedProduct();
+  if (!selected) return;
+  state.copyX = Number(selected.copyX || 50);
+  state.copyY = Number(selected.copyY || 47);
+}
+
 function filteredProducts() {
   const keyword = state.search.trim().toLowerCase();
   if (!keyword) return state.products;
@@ -163,6 +171,35 @@ function filteredCafe24Products() {
 function optionSetSummary(ids) {
   if (!ids || !ids.length) return "-";
   return ids.join(", ");
+}
+
+function bindSearchInput(selector, stateKey) {
+  const input = document.querySelector(selector);
+  if (!input) return;
+
+  let composing = false;
+
+  input.addEventListener("compositionstart", () => {
+    composing = true;
+  });
+
+  input.addEventListener("compositionend", (event) => {
+    composing = false;
+    state[stateKey] = event.target.value;
+    renderApp();
+  });
+
+  input.addEventListener("input", (event) => {
+    state[stateKey] = event.target.value;
+    if (!composing) {
+      renderApp();
+    }
+  });
+}
+
+function recentTemplates() {
+  const cutoff = new Date("2026-04-14T00:00:00");
+  return state.products.filter((item) => new Date(item.updatedAt.replace(" ", "T")) >= cutoff);
 }
 
 function successRate() {
@@ -208,10 +245,12 @@ function calliFill() {
   return state.calliColor === "실버" ? "#8a8f99" : "#b8891c";
 }
 
-function previewCard() {
+function previewCard(shapeOverride) {
+  const selectedShape = shapeOverride || getSelectedProduct().shape;
+  const frameClass = selectedShape === "직사각형" ? "frame-art rectangle" : "frame-art";
   return `
     <div class="frame-shell">
-      <div class="frame-art" style="background:${frameGradient()};">
+      <div class="${frameClass}" style="background:${frameGradient()};">
         <div class="frame-inner" style="background:${bgFill()};">
           <div class="frame-chip">0.1 g</div>
           <div class="frame-copy" style="left:${state.copyX}%;top:${state.copyY}%;font-size:${state.fontScale}px;color:${calliFill()};">
@@ -276,25 +315,106 @@ function dashboardSection() {
 
 function templatesSection() {
   const selected = getSelectedProduct();
-  return `
-    <div class="content-area">
-      <div class="grid-4">
-        <div class="soft-box"><div style="font-weight:700;">1. 템플릿 생성</div><div class="small muted" style="margin-top:8px;">템플릿 ID, 정사각/직사각, 문구 좌표, 폰트, 최대 글자수, 줄 수, 옵션셋 연결 설정</div></div>
-        <div class="soft-box"><div style="font-weight:700;">2. 옵션셋 생성</div><div class="small muted" style="margin-top:8px;">프레임 컬러, 배경 컬러, 캘리 컬러 등 옵션셋과 기본값 생성</div></div>
-        <div class="soft-box"><div style="font-weight:700;">3. 카페24 상품 매핑</div><div class="small muted" style="margin-top:8px;">product_no 와 템플릿, 연결 옵션셋을 관리자에서 매핑</div></div>
-        <div class="soft-box"><div style="font-weight:700;">예시 구조</div><div class="small muted" style="margin-top:8px;">TPL-SQ-01 / OPT-FRAME-01 / product_no_101</div></div>
+  const createTab = `
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">템플릿 생성</h2>
+        <div class="card-description">원본 에셋을 새로 만드는 화면이 아니라, 운영 가능한 템플릿 소스를 등록하는 단계입니다.</div>
       </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <label class="form-field">
+            <span class="field-label">템플릿 이름</span>
+            <input id="draftName" class="text-input" value="${escapeHtml(state.templateDraft.name)}" placeholder="예: 정사각 신규 템플릿" />
+          </label>
+          <label class="form-field">
+            <span class="field-label">템플릿 ID</span>
+            <input id="draftTemplateId" class="text-input" value="${escapeHtml(state.templateDraft.templateId)}" placeholder="예: TPL-SQ-01" />
+          </label>
+          <label class="form-field">
+            <span class="field-label">액자 형태</span>
+            <select id="draftShape" class="select">
+              <option value="정사각형" ${state.templateDraft.shape === "정사각형" ? "selected" : ""}>정사각</option>
+              <option value="직사각형" ${state.templateDraft.shape === "직사각형" ? "selected" : ""}>직사각</option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span class="field-label">기준 폰트</span>
+            <select id="draftFont" class="select">
+              ${state.registeredFonts.map((font) => `<option value="${font}" ${state.templateDraft.font === font ? "selected" : ""}>${font}</option>`).join("")}
+            </select>
+          </label>
+          <label class="form-field">
+            <span class="field-label">가로(mm)</span>
+            <input id="draftWidth" class="text-input" value="${escapeHtml(state.templateDraft.widthMm)}" placeholder="예: 180" />
+          </label>
+          <label class="form-field">
+            <span class="field-label">세로(mm)</span>
+            <input id="draftHeight" class="text-input" value="${escapeHtml(state.templateDraft.heightMm)}" placeholder="예: 180" />
+          </label>
+        </div>
 
-      <div class="grid-main">
+        <div class="grid-2" style="margin-top:18px;">
+          <div class="summary-box">
+            <div style="font-weight:700;">기본 출력 규칙</div>
+            <div class="key-value" style="margin-top:16px;">
+              <div class="key-value-row"><span>문구 X 좌표</span><strong><input id="draftCopyX" class="text-input" value="${escapeHtml(state.templateDraft.copyX)}" style="width:88px;padding:8px 10px;" /></strong></div>
+              <div class="key-value-row"><span>문구 Y 좌표</span><strong><input id="draftCopyY" class="text-input" value="${escapeHtml(state.templateDraft.copyY)}" style="width:88px;padding:8px 10px;" /></strong></div>
+              <div class="key-value-row"><span>최대 줄수</span><strong><input id="draftMaxLines" class="text-input" value="${escapeHtml(state.templateDraft.maxLines)}" style="width:88px;padding:8px 10px;" /></strong></div>
+              <div class="key-value-row"><span>글자수 제한</span><strong><input id="draftMaxChars" class="text-input" value="${escapeHtml(state.templateDraft.maxChars)}" style="width:88px;padding:8px 10px;" /></strong></div>
+              <div class="key-value-row"><span>자동 아웃라인</span><strong>사용</strong></div>
+            </div>
+          </div>
+          <div class="summary-box">
+            <div style="font-weight:700;">생성 후 상태</div>
+            <div class="key-value" style="margin-top:16px;">
+              <div class="key-value-row"><span>초기 상태</span><strong>테스트중</strong></div>
+              <div class="key-value-row"><span>버전</span><strong>v1.0</strong></div>
+              <div class="key-value-row"><span>상품 연결</span><strong>미연결</strong></div>
+              <div class="key-value-row"><span>옵션/색상셋 연결</span><strong>${escapeHtml(optionSetSummary(state.templateDraft.linkedOptionSetIds))}</strong></div>
+            </div>
+            <div class="button-row" style="margin-top:14px;">
+              <button class="button secondary" data-action="open-option-set-picker">옵션/색상셋 연결</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-row" style="margin-top:20px;">
+          <button class="button secondary" data-action="reset-template-draft">임시저장</button>
+          <button class="button primary" data-action="create-template-inline">템플릿 생성</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">최근 7일 이내 생성 리스트</h2>
+        <div class="card-description">최근 생성한 템플릿만 하단에서 빠르게 확인합니다.</div>
+      </div>
+      <div class="card-body">
+        <div class="recent-list">
+          ${recentTemplates().map((item) => `
+            <div class="soft-box">
+              <div class="job-top">
+                <div>
+                  <div style="font-weight:700;">${escapeHtml(item.name)}</div>
+                  <div class="small muted" style="margin-top:6px;">${escapeHtml(item.template)} · ${escapeHtml(item.cafe24)}</div>
+                </div>
+                <span class="${badgeClass(item.status)}">${escapeHtml(item.status)}</span>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const listTab = `
+    <div class="grid-main">
       <div class="card">
         <div class="card-header">
-          <div class="job-top">
-            <div>
-              <h2 class="card-title">상품 / 템플릿 매핑</h2>
-              <div class="card-description">상품 추가를 신규 개발로 만들지 않고 템플릿 연결로 끝나게 하는 구조를 전제로 합니다.</div>
-            </div>
-            <button class="button primary" data-action="open-template-create">템플릿 생성</button>
-          </div>
+          <h2 class="card-title">템플릿 리스트</h2>
+          <div class="card-description">전체 템플릿 리스트와 카페24 상품 매핑 상태를 확인합니다.</div>
         </div>
         <div class="card-body">
           <div class="product-search"><input id="searchInput" class="text-input" value="${escapeHtml(state.search)}" placeholder="상품명, 템플릿 ID, 카페24 상품번호 검색" /></div>
@@ -319,48 +439,88 @@ function templatesSection() {
       </div>
       <div class="card">
         <div class="card-header">
-          <div class="job-top">
-            <div>
-              <h2 class="card-title">${escapeHtml(selected.name)}</h2>
-              <div class="card-description">원본 디자인 파일 수정이 아니라 운영자가 조정 가능한 설정값만 다루는 화면입니다.</div>
-            </div>
-            <div class="inline-actions">
-              <button class="button secondary">버전 롤백</button>
-              <button class="button primary" data-action="republish">운영 반영</button>
-            </div>
-          </div>
+          <h2 class="card-title">${escapeHtml(selected.name)}</h2>
+          <div class="card-description">카페24 상품, 연결 템플릿, 옵션셋까지 포함한 전체 매핑 구조입니다.</div>
         </div>
         <div class="card-body">
-          <div class="grid-2">
-            <div class="soft-box">
-              <div style="font-weight:700;">기본 연결 정보</div>
-              <div class="key-value" style="margin-top:16px;">
-                <div class="key-value-row"><span>카페24 상품번호</span><strong>${escapeHtml(selected.cafe24)}</strong></div>
-                <div class="key-value-row"><span>연결 템플릿</span><strong>${escapeHtml(selected.template)}</strong></div>
-                <div class="key-value-row"><span>연결 옵션셋</span><strong>${escapeHtml(optionSetSummary(selected.optionSetIds))}</strong></div>
-                <div class="key-value-row"><span>상패 형태</span><strong>${escapeHtml(selected.shape)}</strong></div>
-                <div class="key-value-row"><span>출력 폰트</span><strong>${escapeHtml(selected.font)}</strong></div>
-                <div class="key-value-row"><span>문구 좌표</span><strong>X ${escapeHtml(selected.copyX)} / Y ${escapeHtml(selected.copyY)}</strong></div>
-                <div class="key-value-row"><span>글자수 / 줄 수</span><strong>${escapeHtml(selected.maxChars)}자 / ${escapeHtml(selected.maxLines)}줄</strong></div>
-              </div>
-            </div>
-            <div class="soft-box">
-              <div class="toggle-row">
-                <div><div style="font-weight:700;">안전 모드</div><div class="tiny muted" style="margin-top:4px;">템플릿 원본 수정 차단, 설정값만 저장</div></div>
-                <button class="switch ${state.safeMode ? "on" : ""}" data-action="toggle-safe"></button>
-              </div>
-              <div style="height:1px;background:var(--line);margin:16px 0;"></div>
-              <div class="toggle-row">
-                <div><div style="font-weight:700;">자동 아웃라인</div><div class="tiny muted" style="margin-top:4px;">PDF 생성 시 폰트 깨짐 방지</div></div>
-                <button class="switch ${state.autoOutline ? "on" : ""}" data-action="toggle-outline"></button>
-              </div>
-              <div class="guide-box" style="margin-top:16px;">현재 운영 버전: <strong>${escapeHtml(state.templateVersion)}</strong></div>
-            </div>
+          <div class="key-value">
+            <div class="key-value-row"><span>카페24 상품번호</span><strong>${escapeHtml(selected.cafe24)}</strong></div>
+            <div class="key-value-row"><span>연결 템플릿</span><strong>${escapeHtml(selected.template)}</strong></div>
+            <div class="key-value-row"><span>연결 옵션셋</span><strong>${escapeHtml(optionSetSummary(selected.optionSetIds))}</strong></div>
+            <div class="key-value-row"><span>문구 좌표</span><strong>X ${escapeHtml(selected.copyX)} / Y ${escapeHtml(selected.copyY)}</strong></div>
+            <div class="key-value-row"><span>최대 글자수 / 줄 수</span><strong>${escapeHtml(selected.maxChars)}자 / ${escapeHtml(selected.maxLines)}줄</strong></div>
           </div>
           <div style="margin-top:18px;">${previewCard()}</div>
         </div>
       </div>
     </div>
+  `;
+
+  const optionTab = `
+    <div class="content-area">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">옵션 / 색상셋 생성</h2>
+          <div class="card-description">상단에서 새 옵션셋을 만들고, 하단에서 생성된 모든 옵션/색상셋을 확인합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <label class="form-field">
+              <span class="field-label">옵션셋 ID</span>
+              <input id="optionSetId" class="text-input" value="${escapeHtml(state.optionSetDraft.id)}" placeholder="예: OPT-FRAME-01" />
+            </label>
+            <label class="form-field">
+              <span class="field-label">옵션셋 이름</span>
+              <input id="optionSetTitle" class="text-input" value="${escapeHtml(state.optionSetDraft.title)}" placeholder="예: 프레임 컬러" />
+            </label>
+            <label class="form-field full">
+              <span class="field-label">옵션 값</span>
+              <input id="optionSetValues" class="text-input" value="${escapeHtml(state.optionSetDraft.values)}" placeholder="예: 골드, 실버, 블랙" />
+            </label>
+            <label class="form-field full">
+              <span class="field-label">기본값</span>
+              <input id="optionSetDefault" class="text-input" value="${escapeHtml(state.optionSetDraft.defaultValue)}" placeholder="예: 골드" />
+            </label>
+          </div>
+          <div class="button-row" style="margin-top:18px;">
+            <button class="button primary" data-action="confirm-option-set-create">옵션/색상셋 생성</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">전체 옵션 / 색상셋 리스트</h2>
+          <div class="card-description">생성된 모든 옵션/색상셋을 아래에서 관리합니다.</div>
+        </div>
+        <div class="card-body">
+          <div class="option-stack">
+            ${state.optionSets.map((set) => `
+              <div class="soft-box">
+                <div class="option-card-top">
+                  <div>
+                    <div style="font-weight:700;">${escapeHtml(set.id)}</div>
+                    <div class="small muted" style="margin-top:6px;">${escapeHtml(set.title)}</div>
+                  </div>
+                  <span class="${set.active ? "badge success" : "badge neutral"}">${set.active ? "활성" : "비활성"}</span>
+                </div>
+                <div class="chip-group" style="margin-top:12px;">${set.values.map((value) => `<span class="badge neutral">${escapeHtml(value)}</span>`).join("")}</div>
+                <div class="tiny muted" style="margin-top:10px;">기본값: ${escapeHtml(set.defaultValue)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return `
+    <div class="content-area">
+      <div class="tab-row">
+        <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. 템플릿 생성</button>
+        <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. 템플릿 리스트</button>
+        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. 옵션 / 색상셋</button>
+      </div>
+      ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : optionTab}
     </div>
   `;
 }
@@ -466,11 +626,14 @@ function pdfSection() {
               <div class="job-top">
                 <div>
                   <div class="icon-label"><strong>주문번호 : ${escapeHtml(job.orderRef)}</strong><span class="${badgeClass(job.status)}">${escapeHtml(job.status)}</span><span class="${badgeClass(job.downloadStatus)}">${escapeHtml(job.downloadStatus)}</span></div>
-                  <div class="small" style="margin-top:10px;color:var(--text);">일시 : ${escapeHtml(job.createdAt)}</div>
-                  <div class="small" style="margin-top:8px;color:var(--text);">주문자 : ${escapeHtml(job.customerName)}</div>
-                  <div class="small" style="margin-top:8px;color:var(--text);">연락처 : ${escapeHtml(job.customerPhone)}</div>
-                  <div class="small" style="margin-top:8px;color:var(--text);">상품명 : ${escapeHtml(job.orderedProduct)}</div>
-                  <div class="small" style="margin-top:8px;color:var(--text);">옵션 : ${escapeHtml(job.orderedOptions)}</div>
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin-top:12px;">
+                    <div class="small" style="color:var(--text);"><strong>주문자명</strong> : ${escapeHtml(job.customerName)}</div>
+                    <div class="small" style="color:var(--text);"><strong>주문자 연락처</strong> : ${escapeHtml(job.customerPhone)}</div>
+                    <div class="small" style="color:var(--text);"><strong>제품명</strong> : ${escapeHtml(job.orderedProduct)}</div>
+                    <div class="small" style="color:var(--text);"><strong>카페24 주문번호</strong> : ${escapeHtml(job.orderRef)}</div>
+                    <div class="small" style="color:var(--text);grid-column:1 / -1;"><strong>옵션</strong> : ${escapeHtml(job.orderedOptions)}</div>
+                    <div class="small" style="color:var(--text);grid-column:1 / -1;"><strong>주문일시</strong> : ${escapeHtml(job.createdAt)}</div>
+                  </div>
                   <div class="small muted" style="margin-top:8px;">이슈: ${escapeHtml(job.issue)}</div>
                   <div class="tiny muted" style="margin-top:8px;">작업번호: ${escapeHtml(job.id)} · 템플릿: ${escapeHtml(job.template)}</div>
                 </div>
@@ -735,6 +898,38 @@ function optionSetCreateModal() {
   `;
 }
 
+function optionSetPickerModal() {
+  return `
+    <div class="modal-wrap ${state.optionSetPickerOpen ? "open" : ""}">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <h2 class="card-title">옵션 / 색상셋 불러오기</h2>
+            <div class="card-description">사전에 생성한 옵션/색상셋을 중복 선택해서 템플릿에 연결합니다.</div>
+          </div>
+          <button class="close-button" data-action="close-option-set-picker">닫기</button>
+        </div>
+        <div class="picker-list" style="margin-top:18px;">
+          ${state.optionSets.map((set) => `
+            <button class="picker-item" data-action="toggle-draft-option-set" data-id="${set.id}">
+              <div class="job-top">
+                <div>
+                  <div style="font-weight:700;">${escapeHtml(set.id)}</div>
+                  <div class="small muted" style="margin-top:6px;">${escapeHtml(set.title)}</div>
+                </div>
+                <span class="${state.templateDraft.linkedOptionSetIds.includes(set.id) ? "badge success" : "badge neutral"}">${state.templateDraft.linkedOptionSetIds.includes(set.id) ? "선택됨" : "선택가능"}</span>
+              </div>
+            </button>
+          `).join("")}
+        </div>
+        <div class="button-row" style="margin-top:18px;justify-content:flex-end;">
+          <button class="button primary" data-action="close-option-set-picker">선택 완료</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function productPickerModal() {
   return `
     <div class="modal-wrap ${state.productPickerOpen ? "open" : ""}">
@@ -813,7 +1008,11 @@ function bindActions() {
     element.addEventListener("click", () => {
       const { action, id, value } = element.dataset;
       if (action === "nav") state.activeNav = id;
-      if (action === "select-product") state.selectedProductId = id;
+      if (action === "template-tab") state.templateTab = value;
+      if (action === "select-product") {
+        state.selectedProductId = id;
+        syncPreviewFromSelectedProduct();
+      }
       if (action === "frame") state.frameColor = value;
       if (action === "background") state.bgColor = value;
       if (action === "calli") state.calliColor = value;
@@ -840,10 +1039,6 @@ function bindActions() {
       }
       if (action === "open-option-set-create") {
         resetOptionSetDraft();
-        state.optionSetCreateOpen = true;
-      }
-      if (action === "close-option-set-create") {
-        state.optionSetCreateOpen = false;
       }
       if (action === "close-template-create") {
         state.templateCreateOpen = false;
@@ -857,6 +1052,8 @@ function bindActions() {
       }
       if (action === "open-product-picker") state.productPickerOpen = true;
       if (action === "close-product-picker") state.productPickerOpen = false;
+      if (action === "open-option-set-picker") state.optionSetPickerOpen = true;
+      if (action === "close-option-set-picker") state.optionSetPickerOpen = false;
       if (action === "select-linked-product") {
         const picked = state.cafe24Products.find((product) => product.id === id);
         if (picked) {
@@ -872,15 +1069,7 @@ function bindActions() {
           state.templateDraft.linkedOptionSetIds = [...state.templateDraft.linkedOptionSetIds, id];
         }
       }
-      if (action === "open-template-confirm") {
-        state.templateCreateOpen = false;
-        state.templateConfirmOpen = true;
-      }
-      if (action === "back-to-template-edit") {
-        state.templateCreateOpen = true;
-        state.templateConfirmOpen = false;
-      }
-      if (action === "confirm-template-create") {
+      if (action === "create-template-inline") {
         const nextIndex = state.products.length + 101;
         const width = Number(state.templateDraft.widthMm || 0);
         const height = Number(state.templateDraft.heightMm || 0);
@@ -901,9 +1090,10 @@ function bindActions() {
         };
         state.products = [newProduct, ...state.products];
         state.selectedProductId = newProduct.id;
-        state.templateConfirmOpen = false;
-        state.templateCreateOpen = false;
+        syncPreviewFromSelectedProduct();
         state.productPickerOpen = false;
+        state.optionSetPickerOpen = false;
+        state.templateTab = "create";
         resetTemplateDraft();
       }
       if (action === "confirm-option-set-create") {
@@ -918,8 +1108,10 @@ function bindActions() {
           },
           ...state.optionSets,
         ];
-        state.optionSetCreateOpen = false;
         resetOptionSetDraft();
+      }
+      if (action === "reset-template-draft") {
+        resetTemplateDraft();
       }
       renderApp();
     });
@@ -927,37 +1119,19 @@ function bindActions() {
 }
 
 function bindInputs() {
-  const searchInput = document.querySelector("#searchInput");
-  if (searchInput) {
-    searchInput.addEventListener("input", (event) => {
-      state.search = event.target.value;
-      renderApp();
-    });
-  }
+  bindSearchInput("#searchInput", "search");
 
   const productSelect = document.querySelector("#productSelect");
   if (productSelect) {
     productSelect.addEventListener("change", (event) => {
       state.selectedProductId = event.target.value;
+      syncPreviewFromSelectedProduct();
       renderApp();
     });
   }
 
-  const pdfSearchInput = document.querySelector("#pdfSearchInput");
-  if (pdfSearchInput) {
-    pdfSearchInput.addEventListener("input", (event) => {
-      state.pdfSearch = event.target.value;
-      renderApp();
-    });
-  }
-
-  const templateProductSearch = document.querySelector("#templateProductSearch");
-  if (templateProductSearch) {
-    templateProductSearch.addEventListener("input", (event) => {
-      state.templateProductSearch = event.target.value;
-      renderApp();
-    });
-  }
+  bindSearchInput("#pdfSearchInput", "pdfSearch");
+  bindSearchInput("#templateProductSearch", "templateProductSearch");
 
   const draftName = document.querySelector("#draftName");
   if (draftName) {
@@ -1073,6 +1247,7 @@ function bindInputs() {
 }
 
 function renderApp() {
+  syncPreviewFromSelectedProduct();
   document.querySelector("#app").innerHTML = `
     <div class="app-shell">
       <aside class="sidebar">
@@ -1111,10 +1286,8 @@ function renderApp() {
     </div>
     ${checklistSheet()}
     ${impactModal()}
-    ${templateCreateModal()}
-    ${optionSetCreateModal()}
+    ${optionSetPickerModal()}
     ${productPickerModal()}
-    ${templateConfirmModal()}
   `;
 
   bindActions();
