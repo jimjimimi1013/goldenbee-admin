@@ -35,10 +35,10 @@ const state = {
     { id: "OPT-CALLI-01", title: "캘리 컬러", values: ["골드", "실버"], defaultValue: "골드", active: true },
   ],
   pdfJobs: [
-    { id: "JOB-240420-001", orderRef: "CAFE24-54821", product: "감사패 정사각형 A", template: "TPL-SQ-01", status: "성공", outlined: true, createdAt: "2026-04-20 08:52", issue: "-" },
-    { id: "JOB-240420-002", orderRef: "CAFE24-54822", product: "감사패 직사각형 B", template: "TPL-RE-01", status: "실패", outlined: false, createdAt: "2026-04-20 08:58", issue: "문구 길이 초과로 텍스트 아웃라인 변환이 중단되었습니다." },
-    { id: "JOB-240420-003", orderRef: "CAFE24-54823", product: "부모님 트로피 정사각형 C", template: "TPL-SQ-01", status: "대기", outlined: false, createdAt: "2026-04-20 09:05", issue: "PDF 생성 큐 대기중" },
-    { id: "JOB-240420-004", orderRef: "CAFE24-54824", product: "감사패 정사각형 A", template: "TPL-SQ-01", status: "성공", outlined: true, createdAt: "2026-04-20 09:07", issue: "-" },
+    { id: "JOB-240420-001", orderRef: "CAFE24-54821", customerName: "김민준", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 골드", template: "TPL-SQ-01", status: "성공", outlined: true, createdAt: "2026-04-20 08:52", issue: "-" },
+    { id: "JOB-240420-002", orderRef: "CAFE24-54822", customerName: "이서연", orderedProduct: "감사패 직사각형 B", orderedOptions: "프레임 블랙 / 배경 웜그레이 / 캘리 실버", template: "TPL-RE-01", status: "실패", outlined: false, createdAt: "2026-04-20 08:58", issue: "문구 길이 초과로 텍스트 아웃라인 변환이 중단되었습니다." },
+    { id: "JOB-240420-003", orderRef: "CAFE24-54823", customerName: "박지후", orderedProduct: "부모님 트로피 정사각형 C", orderedOptions: "프레임 실버 / 배경 차콜 / 캘리 골드", template: "TPL-SQ-01", status: "대기", outlined: false, createdAt: "2026-04-20 09:05", issue: "PDF 생성 큐 대기중" },
+    { id: "JOB-240420-004", orderRef: "CAFE24-54824", customerName: "최윤아", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 실버", template: "TPL-SQ-01", status: "성공", outlined: true, createdAt: "2026-04-20 09:07", issue: "-" },
   ],
   logs: [
     { id: "LOG-001", level: "error", title: "PDF 생성 실패", detail: "문구 최대 길이를 초과하여 텍스트 아웃라인 변환이 중단되었습니다.", time: "2026-04-20 08:58" },
@@ -348,7 +348,9 @@ function pdfSection() {
               <div class="job-top">
                 <div>
                   <div class="icon-label"><strong>${escapeHtml(job.id)}</strong><span class="${badgeClass(job.status)}">${escapeHtml(job.status)}</span>${job.outlined ? '<span class="badge dark">아웃라인 적용</span>' : ""}</div>
-                  <div class="small muted" style="margin-top:10px;">주문 참조: ${escapeHtml(job.orderRef)} · 상품: ${escapeHtml(job.product)} · 템플릿: ${escapeHtml(job.template)}</div>
+                  <div class="small muted" style="margin-top:10px;">주문 참조: ${escapeHtml(job.orderRef)} · 주문자: ${escapeHtml(job.customerName)} · 템플릿: ${escapeHtml(job.template)}</div>
+                  <div class="small muted" style="margin-top:8px;">실주문 상품: ${escapeHtml(job.orderedProduct)}</div>
+                  <div class="small muted" style="margin-top:8px;">선택 옵션: ${escapeHtml(job.orderedOptions)}</div>
                   <div class="small muted" style="margin-top:8px;">이슈: ${escapeHtml(job.issue)}</div>
                   <div class="tiny muted" style="margin-top:8px;">생성 시각: ${escapeHtml(job.createdAt)}</div>
                 </div>
