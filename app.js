@@ -347,12 +347,12 @@ function pdfSection() {
             <div class="job-box">
               <div class="job-top">
                 <div>
-                  <div class="icon-label"><strong>${escapeHtml(job.id)}</strong><span class="${badgeClass(job.status)}">${escapeHtml(job.status)}</span>${job.outlined ? '<span class="badge dark">아웃라인 적용</span>' : ""}</div>
-                  <div class="small muted" style="margin-top:10px;">주문 참조: ${escapeHtml(job.orderRef)} · 주문자: ${escapeHtml(job.customerName)} · 템플릿: ${escapeHtml(job.template)}</div>
-                  <div class="small muted" style="margin-top:8px;">실주문 상품: ${escapeHtml(job.orderedProduct)}</div>
-                  <div class="small muted" style="margin-top:8px;">선택 옵션: ${escapeHtml(job.orderedOptions)}</div>
+                  <div class="icon-label"><strong>주문자 : ${escapeHtml(job.customerName)}</strong><span class="${badgeClass(job.status)}">${escapeHtml(job.status)}</span>${job.outlined ? '<span class="badge dark">아웃라인 적용</span>' : ""}</div>
+                  <div class="small" style="margin-top:10px;color:var(--text);">주문상품 : ${escapeHtml(job.orderedProduct)}</div>
+                  <div class="small" style="margin-top:8px;color:var(--text);">선택옵션 : ${escapeHtml(job.orderedOptions)}</div>
                   <div class="small muted" style="margin-top:8px;">이슈: ${escapeHtml(job.issue)}</div>
                   <div class="tiny muted" style="margin-top:8px;">생성 시각: ${escapeHtml(job.createdAt)}</div>
+                  <div class="tiny muted" style="margin-top:8px;">작업번호: ${escapeHtml(job.id)} · 주문번호: ${escapeHtml(job.orderRef)} · 템플릿: ${escapeHtml(job.template)}</div>
                 </div>
                 <div class="button-row">
                   <button class="button secondary">미리보기</button>
