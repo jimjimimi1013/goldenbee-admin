@@ -33,12 +33,12 @@ const state = {
     { id: "P-103", name: "부모님 트로피 정사각형 C", cafe24: "product_no_103", template: "TPL-SQ-01", shape: "정사각형", font: "Pretendard SemiBold", optionSetIds: ["OPT-FRAME-01", "OPT-BG-01", "OPT-CALLI-01"], copyX: 50, copyY: 46, maxChars: 22, maxLines: 2, status: "테스트중", updatedAt: "2026-04-18 15:40" },
   ],
   optionSets: [
-    { id: "OPT-FRAME-01", title: "?????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }, { name: "??", code: "#111111" }], defaultValue: "??", active: true },
-    { id: "OPT-BG-01", title: "????", values: [{ name: "????", code: "#F4EFE6" }, { name: "????", code: "#C8C2B8" }, { name: "??", code: "#464646" }], defaultValue: "????", active: true },
-    { id: "OPT-CALLI-01", title: "????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }], defaultValue: "??", active: true },
-    { id: "OPT-WEIGHT-01", title: "? ??? ??", values: [{ name: "0.1g", code: "" }, { name: "0.2g", code: "" }, { name: "0.3g", code: "" }], defaultValue: "0.1g", active: true },
-    { id: "OPT-TITLE-COLOR-01", title: "????? ????", values: [{ name: "??", code: "#C8A44D" }, { name: "??", code: "#BFC4CC" }, { name: "??", code: "#111111" }], defaultValue: "??", active: true },
-    { id: "OPT-SUBTITLE-COLOR-01", title: "????", values: [{ name: "??", code: "#111111" }, { name: "???", code: "#767676" }, { name: "???", code: "#6B4C35" }], defaultValue: "??", active: true },
+    { id: "OPT-FRAME-01", title: "프레임컬러", values: [{ name: "골드", code: "#C8A44D" }, { name: "실버", code: "#BFC4CC" }, { name: "블랙", code: "#111111" }], defaultValue: "골드", active: true },
+    { id: "OPT-BG-01", title: "배경컬러", values: [{ name: "아이보리", code: "#F4EFE6" }, { name: "웜그레이", code: "#C8C2B8" }, { name: "차콜", code: "#464646" }], defaultValue: "아이보리", active: true },
+    { id: "OPT-CALLI-01", title: "캘리컬러", values: [{ name: "골드", code: "#C8A44D" }, { name: "실버", code: "#BFC4CC" }], defaultValue: "골드", active: true },
+    { id: "OPT-WEIGHT-01", title: "금 스티커 중량", values: [{ name: "0.1g", code: "" }, { name: "0.2g", code: "" }, { name: "0.3g", code: "" }], defaultValue: "0.1g", active: true },
+    { id: "OPT-TITLE-COLOR-01", title: "메인타이틀 캘리컬러", values: [{ name: "골드", code: "#C8A44D" }, { name: "실버", code: "#BFC4CC" }, { name: "블랙", code: "#111111" }], defaultValue: "골드", active: true },
+    { id: "OPT-SUBTITLE-COLOR-01", title: "문구컬러", values: [{ name: "블랙", code: "#111111" }, { name: "그레이", code: "#767676" }, { name: "브라운", code: "#6B4C35" }], defaultValue: "블랙", active: true },
   ],
   pdfJobs: [
     { id: "JOB-240420-001", orderRef: "CAFE24-54821", customerName: "김민준", customerPhone: "010-2451-8821", orderedProduct: "감사패 정사각형 A", orderedOptions: "프레임 골드 / 배경 아이보리 / 캘리 골드 / 0.1g", template: "TPL-SQ-01", status: "성공", downloadStatus: "다운로드대기", createdAt: "2026-04-20 08:52", issue: "-" },
@@ -97,27 +97,27 @@ const state = {
   optionSetDraft: {
     id: "",
     type: "frame",
-    title: "?????",
-    items: [{ name: "??", code: "#C8A44D" }],
+    title: "프레임컬러",
+    items: [{ name: "골드", code: "#C8A44D" }],
     defaultIndex: 0,
   },
 };
 
 
 const SHAPE_PRESETS = {
-  "????": { widthMm: "180", heightMm: "180", copyX: "50", copyY: "47", maxChars: "25", maxLines: "3" },
-  "????": { widthMm: "240", heightMm: "180", copyX: "48", copyY: "45", maxChars: "28", maxLines: "3" },
+  "정사각형": { widthMm: "180", heightMm: "180", copyX: "50", copyY: "47", maxChars: "25", maxLines: "3" },
+  "직사각형": { widthMm: "240", heightMm: "180", copyX: "48", copyY: "45", maxChars: "28", maxLines: "3" },
 };
 
 const OPTION_SET_TYPES = [
-  { key: "frame", title: "?????", prefix: "OPT-FRAME" },
-  { key: "bg", title: "????", prefix: "OPT-BG" },
-  { key: "calli", title: "????", prefix: "OPT-CALLI" },
-  { key: "text", title: "????", prefix: "OPT-TEXT" },
+  { key: "frame", title: "프레임컬러", prefix: "OPT-FRAME" },
+  { key: "bg", title: "배경컬러", prefix: "OPT-BG" },
+  { key: "calli", title: "캘리컬러", prefix: "OPT-CALLI" },
+  { key: "text", title: "문구컬러", prefix: "OPT-TEXT" },
 ];
 
 function getShapePreset(shape) {
-  const fallback = SHAPE_PRESETS[shape] || SHAPE_PRESETS["????"];
+  const fallback = SHAPE_PRESETS[shape] || SHAPE_PRESETS["정사각형"];
   const matched = state.products.find((product) => product.shape === shape);
   if (!matched) return fallback;
   return {
@@ -131,7 +131,7 @@ function getShapePreset(shape) {
 }
 
 function getTemplatePrefix(shape) {
-  return shape === "????" ? "TPL-RE" : "TPL-SQ";
+  return shape === "직사각형" ? "TPL-RE" : "TPL-SQ";
 }
 
 function nextSequenceFromIds(ids, prefix) {
@@ -214,8 +214,8 @@ function resetOptionSetDraft() {
   state.optionSetDraft = {
     id: "",
     type: "frame",
-    title: "?????",
-    items: [{ name: "??", code: "#C8A44D" }],
+    title: "프레임컬러",
+    items: [{ name: "골드", code: "#C8A44D" }],
     defaultIndex: 0,
   };
   refreshOptionSetDraftId();
@@ -459,7 +459,7 @@ function templatesSection() {
             <input id="draftName" class="text-input" value="${escapeHtml(state.templateDraft.name)}" placeholder="예: 정사각 신규 템플릿" />
           </label>
           <div class="form-field">
-            <span class="field-label">??? ID</span>
+            <span class="field-label">템플릿 ID</span>
             <div class="summary-box" style="padding:14px 16px;">${escapeHtml(state.templateDraft.templateId)}</div>
           </div>
           <label class="form-field">
@@ -495,7 +495,7 @@ function templatesSection() {
               <div class="key-value-row"><span>글자수 제한</span><strong><input id="draftMaxChars" class="text-input" value="${escapeHtml(state.templateDraft.maxChars)}" style="width:88px;padding:8px 10px;" /></strong></div>
               <div class="key-value-row"><span>자동 아웃라인</span><strong>사용</strong></div>
             </div>
-            <div class="tiny muted" style="margin-top:12px;">?? ??? ??? ?? ??? ?? ??? ??? ???? ?????.</div>
+            <div class="tiny muted" style="margin-top:12px;">액자 형태를 바꾸면 문구 좌표와 최대 글자수 규칙이 자동으로 채워집니다.</div>
           </div>
           <div class="summary-box">
             <div style="font-weight:700;">생성 후 상태</div>
@@ -598,23 +598,23 @@ function templatesSection() {
         <div class="card-body">
           <div class="form-grid">
             <div class="form-field">
-              <span class="field-label">??? ID</span>
+              <span class="field-label">옵션셋 ID</span>
               <div class="summary-box" style="padding:14px 16px;">${escapeHtml(state.optionSetDraft.id)}</div>
             </div>
             <div class="form-field full">
-              <span class="field-label">??? ??</span>
+              <span class="field-label">옵션셋 이름</span>
               <div class="chip-group">${OPTION_SET_TYPES.map((type) => `<button class="${chooseButton(state.optionSetDraft.type === type.key)}" data-action="select-option-type" data-value="${type.key}">${type.title}</button>`).join("")}</div>
             </div>
             <div class="form-field full">
-              <span class="field-label">??? / ????</span>
-              <div class="option-item-stack">${state.optionSetDraft.items.map((item, index) => `<div class="option-item-row"><input class="text-input" data-option-item-name="${index}" value="${escapeHtml(item.name)}" placeholder="???" /><input class="text-input" data-option-item-code="${index}" value="${escapeHtml(item.code)}" placeholder="#C8A44D" /><button class="${chooseButton(state.optionSetDraft.defaultIndex === index)}" data-action="set-default-option-item" data-id="${index}">???</button><button class="button secondary" data-action="remove-option-item" data-id="${index}">??</button></div>`).join("")}</div>
+              <span class="field-label">옵션명 / 컬러코드</span>
+              <div class="option-item-stack">${state.optionSetDraft.items.map((item, index) => `<div class="option-item-row"><input class="text-input" data-option-item-name="${index}" value="${escapeHtml(item.name)}" placeholder="컬러명" /><input class="text-input" data-option-item-code="${index}" value="${escapeHtml(item.code)}" placeholder="#C8A44D" /><button class="${chooseButton(state.optionSetDraft.defaultIndex === index)}" data-action="set-default-option-item" data-id="${index}">기본값</button><button class="button secondary" data-action="remove-option-item" data-id="${index}">삭제</button></div>`).join("")}</div>
               <div class="button-row" style="margin-top:12px;">
-                <button class="button secondary" data-action="add-option-item">+ ??? ??</button>
+                <button class="button secondary" data-action="add-option-item">+ 옵션명 추가</button>
               </div>
             </div>
           </div>
           <div class="button-row" style="margin-top:18px;">
-            <button class="button primary" data-action="confirm-option-set-create">??/??? ??</button>
+            <button class="button primary" data-action="confirm-option-set-create">옵션/색상셋 생성</button>
           </div>
         </div>
       </div>
@@ -647,10 +647,10 @@ function templatesSection() {
   return `
     <div class="content-area">
       <div class="tab-row">
-        <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. ????????</button>
-        <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. ??????????/button>
-        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. ??? / ?????/button>
-        <button class="tab-button ${state.templateTab === "typography" ? "active" : ""}" data-action="template-tab" data-value="typography">4. ??? / ??? / ???</button>
+        <button class="tab-button ${state.templateTab === "create" ? "active" : ""}" data-action="template-tab" data-value="create">1. 템플릿 생성</button>
+        <button class="tab-button ${state.templateTab === "list" ? "active" : ""}" data-action="template-tab" data-value="list">2. 템플릿 리스트</button>
+        <button class="tab-button ${state.templateTab === "options" ? "active" : ""}" data-action="template-tab" data-value="options">3. 옵션 / 색상셋</button>
+        <button class="tab-button ${state.templateTab === "typography" ? "active" : ""}" data-action="template-tab" data-value="typography">4. 문구 / 폰트 / 좌표</button>
       </div>
       ${state.templateTab === "create" ? createTab : state.templateTab === "list" ? listTab : state.templateTab === "options" ? optionTab : typographySection()}
     </div>
@@ -1339,17 +1339,17 @@ function bindActions() {
         const height = Number(state.templateDraft.heightMm || 0);
         const newProduct = {
           id: `P-${nextIndex}`,
-          name: state.templateDraft.name || `?? ??? ${state.products.length + 1}`,
+          name: state.templateDraft.name || `신규 템플릿 ${state.products.length + 1}`,
           cafe24: state.templateDraft.linkedProductId || "product_unlinked",
           template: state.templateDraft.templateId || generateTemplateId(state.templateDraft.shape),
-          shape: state.templateDraft.shape || (width && height && width === height ? "????" : "????"),
+          shape: state.templateDraft.shape || (width && height && width === height ? "정사각형" : "직사각형"),
           font: state.templateDraft.font,
           optionSetIds: [...state.templateDraft.linkedOptionSetIds],
           copyX: Number(state.templateDraft.copyX || 50),
           copyY: Number(state.templateDraft.copyY || 47),
           maxChars: Number(state.templateDraft.maxChars || 25),
           maxLines: Number(state.templateDraft.maxLines || 3),
-          status: "????",
+          status: "테스트중",
           updatedAt: "2026-04-21 10:00",
         };
         state.products = [newProduct, ...state.products];
