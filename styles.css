@@ -563,6 +563,57 @@ button {
   gap: 8px;
 }
 
+.form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field.full {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.modal-section {
+  margin-top: 18px;
+}
+
+.picker-list {
+  display: grid;
+  gap: 10px;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.picker-item {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  padding: 14px;
+  text-align: left;
+}
+
+.picker-item:hover {
+  background: #fafafa;
+}
+
+.summary-box {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fafafa;
+  padding: 14px;
+}
+
 @media (max-width: 1180px) {
   .grid-4,
   .flow-grid,
@@ -604,7 +655,8 @@ button {
   }
 
   .product-meta-grid,
-  .preview-meta {
+  .preview-meta,
+  .form-grid {
     grid-template-columns: 1fr;
   }
 }
